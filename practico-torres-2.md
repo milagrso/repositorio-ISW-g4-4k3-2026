@@ -60,7 +60,6 @@ Lo fuera de alcance es:
 * Alta y actualizacion de la informacion de los horarios, actividades
 * Informacion de los shows
 * Inscripciones a las actividades
-* Filtro por fecha
 * Alertas de los horarios
 
 Justificaciones: Se eligio el pago electronico sobre en el efectivo, porque la administracion del parque piensa que sera el mas usado y sera fundamental para probar la recepcion de la aplicacion. Como la hipotesis es solo mostrar informacion se dejo de lado la inscripcion de actividades. Como la carga y mantenimiento de la info de la aplicacion se gestiona fuera de la misma se dejo de lado el alta de la informacion de los servicios.
@@ -175,7 +174,7 @@ Como visitante quiero visualizar la informacion de los shows para informarme a q
 **Pruebas de usuario**
 
 - Probar de visualizar el horario de un show en especifico (pasa)
-- Probar de visualizar la información de un show al interactuar con su icono en el mapa (falla)
+- Probar de visualizar la información de un show al interactuar con su icono en el mapa (pasa)
 
 ###### **7. Inscribirme a actividades para participar**
 
