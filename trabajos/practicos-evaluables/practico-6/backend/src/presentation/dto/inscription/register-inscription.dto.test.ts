@@ -89,7 +89,7 @@ describe('RegisterInscriptionDto - Validation & Creation', () => {
             // Arrange
             const raw = createRegisterInscriptionRawFixture({
                 actividad: null,
-                horario: '10:00hs',
+                horario: '10:00',
                 cantidad: 1,
             });
 
@@ -773,7 +773,7 @@ describe('RegisterInscriptionDto - Validation & Creation', () => {
             // Arrange
             const raw = createRegisterInscriptionRawFixture({
                 actividad: 'Tirolesa',
-                horario: '10:00hs',
+                horario: '10:00',
                 cantidad: 3,
                 participantes: [
                     createParticipantRawFixture({ nombre: 'Felipe', dni: 30784219, edad: 42, talleCalzado: null }),
@@ -797,7 +797,7 @@ describe('RegisterInscriptionDto - Validation & Creation', () => {
             // Arrange
             const raw = createRegisterInscriptionRawFixture({
                 actividad: 'Tirolesa',
-                horario: '10:00hs',
+                horario: '10:00',
                 cantidad: 3,
                 participantes: [
                     createParticipantRawFixture({ nombre: 'Felipe', dni: 30784219, edad: 42 }),
@@ -820,7 +820,7 @@ describe('RegisterInscriptionDto - Validation & Creation', () => {
             // Arrange
             const raw = createRegisterInscriptionRawFixture({
                 actividad: 'Tirolesa',
-                horario: '10:00hs',
+                horario: '10:00',
                 cantidad: 3,
                 participantes: [
                     createParticipantRawFixture({ nombre: 'Felipe', dni: 30784219, edad: 42 }),
