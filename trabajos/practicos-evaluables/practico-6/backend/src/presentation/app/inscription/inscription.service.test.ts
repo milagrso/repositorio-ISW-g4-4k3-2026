@@ -785,8 +785,8 @@ describe('Pruebas unitarias para el InscriptionService', () => {
 
             // Assert
             expect(result.status).toBe('EXITOSA');
-            expect(inscriptionRepositoryMock.reserveSlots).toHaveBeenCalledWith('slot-10', 2);
-            expect(inscriptionRepositoryMock.reserveSlots).not.toHaveBeenCalledWith('slot-11', expect.anything());
+            expect(inscriptionRepositoryMock.reserveSlots).toHaveBeenCalledWith(slot10.id, 2);
+            expect(inscriptionRepositoryMock.reserveSlots).not.toHaveBeenCalledWith(slot11.id, expect.anything());
         });
     });
 
