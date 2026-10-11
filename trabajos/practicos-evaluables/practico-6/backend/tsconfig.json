@@ -3,10 +3,9 @@
     "target": "es2016",
     "module": "commonjs",
     "rootDir": "src",
-    "baseUrl": "./",
     "paths": {
-      "src/*": ["src/*"],
-      "test/*": ["test/*"]
+      "src/*": ["./src/*"],
+      "test/*": ["./test/*"]
     },
     "outDir": "dist/",
     "esModuleInterop": true,
