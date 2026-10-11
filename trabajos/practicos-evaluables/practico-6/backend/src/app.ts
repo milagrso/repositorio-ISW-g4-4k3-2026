@@ -1,6 +1,6 @@
 import { env } from "./config";
 import { PostgreSQLDatabase } from "./infrastructure/postgresql/initializer/database";
-import { Server } from "./presentation";
+import { Server, AppRouter } from "./presentation";
 
 (async () => {
     main();
