@@ -1,4 +1,4 @@
-import { Errors } from 'src/domain/messages/error-type.constants';
+import { Errors } from '../../../domain/messages/error-type.constants';
 
 export interface ParticipantDto {
     nombre: string;

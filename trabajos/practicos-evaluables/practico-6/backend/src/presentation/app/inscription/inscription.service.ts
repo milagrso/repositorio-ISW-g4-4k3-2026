@@ -1,14 +1,14 @@
-import { ParkRepository } from 'src/domain/repositories/park.repository';
-import { ActivityRepository } from 'src/domain/repositories/activity.repository';
-import { InscriptionRepository } from 'src/domain/repositories/inscription.repository';
-import { UserRepository } from 'src/domain/repositories/user.repository';
-import { EmailHelper } from 'src/infrastructure/helpers/email.helper';
-import { QrHelper } from 'src/infrastructure/helpers/qr.helper';
-import { ServiceError } from 'src/domain/messages/service.error';
-import { Errors } from 'src/domain/messages/error-type.constants';
-import { RegisterInscriptionDto } from 'src/presentation/dto/inscription/register-inscription.dto';
-import { EmailStatus, RegisterInscriptionResponse } from 'src/presentation/dto/inscription/register-inscription.res';
-import { InscriptionEntity } from 'src/domain/entities/inscription.entity';
+import { ParkRepository } from '../../../domain/repositories/park.repository';
+import { ActivityRepository } from '../../../domain/repositories/activity.repository';
+import { InscriptionRepository } from '../../../domain/repositories/inscription.repository';
+import { UserRepository } from '../../../domain/repositories/user.repository';
+import { EmailHelper } from '../../../infrastructure/helpers/email.helper';
+import { QrHelper } from '../../../infrastructure/helpers/qr.helper';
+import { ServiceError } from '../../../domain/messages/service.error';
+import { Errors } from '../../../domain/messages/error-type.constants';
+import { RegisterInscriptionDto } from '../../dto/inscription/register-inscription.dto';
+import { EmailStatus, RegisterInscriptionResponse } from '../../dto/inscription/register-inscription.res';
+import { InscriptionEntity } from '../../../domain/entities/inscription.entity';
 
 export class InscriptionService {
     constructor(
