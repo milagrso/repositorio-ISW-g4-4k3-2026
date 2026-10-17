@@ -45,10 +45,6 @@ export class PostgresUserDataSource implements UserDataSource {
             return UserEntity.fromObject(firstUser.dataValues);
         }
 
-        return UserEntity.fromObject({
-            id: 1,
-            nombre: 'Felipe',
-            email: sessionEmail || 'felipe@ejemplo.com'
-        });
+        return null;
     }
 }
