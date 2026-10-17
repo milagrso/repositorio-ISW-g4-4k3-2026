@@ -2427,3 +2427,265 @@ test_jardineria_cantidad_supera_cupo_maximo_actividad_rechaza_inscripcion
 - Mensaje: "La cantidad de inscriptos supera la capacidad máxima permitida para esta actividad (máximo 12)"
 - No se registra la inscripción
 - Cupos disponibles después del intento: 12
+
+
+---
+
+### Casos de prueba adicionales derivados de la coordinación con el frontend y backend (B1, B2, B8, B10, B12)
+
+_Probar registrar inscripción sin ingresar la fecha del turno._ 
+test_fecha_no_ingresada_rechaza_inscripcion
+
+**Precondiciones:**
+- Actividad Safari registrada, activa y habilitada
+- Horario Habilitado: Turno de 10:00 a 11:00hs disponible
+- Cupos: 5 lugares libres en el turno
+- El participante tiene nombre, DNI y edad válidos
+- La cantidad declarada coincide con los datos del participante
+- Los términos y condiciones específicos de Safari están aceptados
+
+**Entrada:**
+- Actividad seleccionada: Safari
+- Fecha seleccionada: Null
+- Horario seleccionado: 10:00hs
+- Cantidad de inscriptos: 1 persona
+- Nombre del participante: Felipe
+- DNI: 30784219
+- Edad: 42 años
+
+**Resultado esperado:**
+- Estado de la operación: RECHAZADA
+- Mensaje: "Debe ingresar la fecha del turno"
+- No se registra la inscripción
+- No se descuentan cupos disponibles
+
+_Probar registrar inscripción con un formato de fecha no válido._ 
+test_fecha_formato_invalido_rechaza_inscripcion
+
+**Precondiciones:**
+- Actividad Safari registrada, activa y habilitada
+- Horario Habilitado: Turno de 10:00 a 11:00hs disponible
+- Cupos: 5 lugares libres en el turno
+- El participante tiene nombre, DNI y edad válidos
+- La fecha ingresada no respeta el formato ISO YYYY-MM-DD
+- Los términos y condiciones específicos de Safari están aceptados
+
+**Entrada:**
+- Actividad seleccionada: Safari
+- Fecha seleccionada: "16/10/2026"
+- Horario seleccionado: 10:00hs
+- Cantidad de inscriptos: 1 persona
+- Nombre del participante: Felipe
+- DNI: 30784219
+- Edad: 42 años
+
+**Resultado esperado:**
+- Estado de la operación: RECHAZADA
+- Mensaje: "El formato de fecha debe ser YYYY-MM-DD"
+- No se registra la inscripción
+- No se descuentan cupos disponibles
+
+_Probar que la reserva de cupos en una fecha no modifique los cupos disponibles de la misma actividad y horario en otra fecha._ 
+test_inscripcion_en_una_fecha_no_modifica_cupos_de_otra_fecha
+
+**Precondiciones:**
+- Actividad Safari registrada, activa y habilitada
+- Horario Habilitado: Turno de 10:00 a 11:00hs
+- Cupos: 8 lugares libres en el turno para el viernes 16/10/2026
+- Cupos: 8 lugares libres en el turno para el sábado 17/10/2026
+- El participante tiene nombre, DNI y edad válidos
+- Los términos y condiciones específicos de Safari están aceptados
+
+**Entrada:**
+- Actividad seleccionada: Safari
+- Fecha seleccionada: "2026-10-16"
+- Horario seleccionado: 10:00hs
+- Cantidad de inscriptos: 2 personas
+- Datos de 2 participantes con nombre, DNI y edad válidos
+
+**Resultado esperado:**
+- Estado de la operación: EXITOSA
+- Mensaje: "Inscripción para Safari realizada con éxito (2 cupos reservados)"
+- Se descuentan 2 cupos para el turno del 16/10/2026 (quedan 6 cupos libres)
+- Los cupos del turno del 17/10/2026 permanecen inalterados en 8 cupos libres
+
+_Probar registrar inscripción sin ingresar correo electrónico de contacto._ 
+test_email_contacto_no_ingresado_rechaza_inscripcion
+
+**Precondiciones:**
+- Actividad Safari registrada, activa y habilitada
+- Horario Habilitado: Turno de 10:00 a 11:00hs disponible
+- Cupos: 5 lugares libres en el turno
+- El participante tiene nombre, DNI y edad válidos
+- El correo electrónico de contacto no se encuentra ingresado
+- Los términos y condiciones específicos de Safari están aceptados
+
+**Entrada:**
+- Actividad seleccionada: Safari
+- Fecha seleccionada: "2026-10-16"
+- Horario seleccionado: 10:00hs
+- Cantidad de inscriptos: 1 persona
+- Nombre del participante: Felipe
+- DNI: 30784219
+- Edad: 42 años
+- Correo electrónico de contacto: Null
+
+**Resultado esperado:**
+- Estado de la operación: RECHAZADA
+- Mensaje: "El correo electrónico de contacto es obligatorio"
+- No se registra la inscripción
+- No se descuentan cupos disponibles
+
+_Probar registrar inscripción con un correo electrónico de formato inválido._ 
+test_email_contacto_formato_invalido_rechaza_inscripcion
+
+**Precondiciones:**
+- Actividad Safari registrada, activa y habilitada
+- Horario Habilitado: Turno de 10:00 a 11:00hs disponible
+- Cupos: 5 lugares libres en el turno
+- El participante tiene nombre, DNI y edad válidos
+- El correo electrónico no posee formato estándar de dirección de email
+- Los términos y condiciones específicos de Safari están aceptados
+
+**Entrada:**
+- Actividad seleccionada: Safari
+- Fecha seleccionada: "2026-10-16"
+- Horario seleccionado: 10:00hs
+- Cantidad de inscriptos: 1 persona
+- Nombre del participante: Felipe
+- DNI: 30784219
+- Edad: 42 años
+- Correo electrónico de contacto: "felipe-sin-arroba"
+
+**Resultado esperado:**
+- Estado de la operación: RECHAZADA
+- Mensaje: "El correo electrónico ingresado no tiene un formato válido"
+- No se registra la inscripción
+- No se descuentan cupos disponibles
+
+_Probar ingresar nombre que contiene letras con diéresis permitidas en español (ej. ü, Ü)._ 
+test_nombre_con_dieresis_permite_inscripcion
+
+**Precondiciones:**
+- Actividad Safari registrada, activa y habilitada
+- Horario Habilitado: Turno de 10:00 a 11:00hs disponible
+- Cupos: 5 lugares libres en el turno
+- El participante tiene DNI y edad válidos
+- El nombre del participante incluye caracteres con diéresis válidos
+- La cantidad declarada coincide con los datos del participante
+- Los términos y condiciones específicos de Safari están aceptados
+
+**Entrada:**
+- Actividad seleccionada: Safari
+- Fecha seleccionada: "2026-10-16"
+- Horario seleccionado: 10:00hs
+- Cantidad de inscriptos: 1 persona
+- Nombre del participante: “Martín Agüero”
+- DNI: 30784219
+- Edad: 42 años
+- Correo electrónico de contacto: "felipe@ejemplo.com"
+
+**Resultado esperado:**
+- Estado de la operación: EXITOSA
+- Mensaje: "Inscripción para Safari realizada con éxito (1 cupo reservado)"
+- Se registra la inscripción con el nombre ingresado correctamente
+- Se descuenta 1 cupo disponible
+
+_Probar registrar inscripción en un día lunes en el que el parque se encuentra cerrado._ 
+test_parque_cerrado_dia_lunes_rechaza_inscripcion
+
+**Precondiciones:**
+- El parque permanece cerrado todos los días lunes según el cronograma oficial
+- La fecha seleccionada corresponde a un día lunes (19/10/2026)
+- El participante tiene nombre, DNI y edad válidos
+- Los términos y condiciones específicos están aceptados
+
+**Entrada:**
+- Actividad seleccionada: Safari
+- Fecha seleccionada: "2026-10-19"
+- Horario seleccionado: 10:00hs
+- Cantidad de inscriptos: 1 persona
+- Nombre del participante: Felipe
+- DNI: 30784219
+- Edad: 42 años
+
+**Resultado esperado:**
+- Estado de la operación: RECHAZADA
+- Mensaje: "El parque está cerrado en la fecha seleccionada"
+- No se registra la inscripción
+- No se descuentan cupos disponibles
+
+_Probar registrar inscripción en el feriado de Navidad (25/12) en el que el parque se encuentra cerrado._ 
+test_parque_cerrado_feriado_navidad_rechaza_inscripcion
+
+**Precondiciones:**
+- El parque permanece cerrado el 25 de diciembre según el cronograma oficial
+- La fecha seleccionada corresponde al 25/12/2026
+- El participante tiene nombre, DNI y edad válidos
+- Los términos y condiciones específicos están aceptados
+
+**Entrada:**
+- Actividad seleccionada: Safari
+- Fecha seleccionada: "2026-12-25"
+- Horario seleccionado: 10:00hs
+- Cantidad de inscriptos: 1 persona
+- Nombre del participante: Felipe
+- DNI: 30784219
+- Edad: 42 años
+
+**Resultado esperado:**
+- Estado de la operación: RECHAZADA
+- Mensaje: "El parque está cerrado en la fecha seleccionada"
+- No se registra la inscripción
+- No se descuentan cupos disponibles
+
+_Probar registrar inscripción en el feriado de Año Nuevo (01/01) en el que el parque se encuentra cerrado._ 
+test_parque_cerrado_feriado_ano_nuevo_rechaza_inscripcion
+
+**Precondiciones:**
+- El parque permanece cerrado el 1 de enero según el cronograma oficial
+- La fecha seleccionada corresponde al 01/01/2027
+- El participante tiene nombre, DNI y edad válidos
+- Los términos y condiciones específicos están aceptados
+
+**Entrada:**
+- Actividad seleccionada: Safari
+- Fecha seleccionada: "2027-01-01"
+- Horario seleccionado: 10:00hs
+- Cantidad de inscriptos: 1 persona
+- Nombre del participante: Felipe
+- DNI: 30784219
+- Edad: 42 años
+
+**Resultado esperado:**
+- Estado de la operación: RECHAZADA
+- Mensaje: "El parque está cerrado en la fecha seleccionada"
+- No se registra la inscripción
+- No se descuentan cupos disponibles
+
+_Probar que una inscripción confirmada devuelva los datos completos de la reserva para el frontend._ 
+test_inscripcion_exitosa_retorna_datos_completos
+
+**Precondiciones:**
+- Actividad Tirolesa registrada, activa y habilitada
+- Horario Habilitado: Turno de 10:00 a 11:00hs con cupos libres para el 17/10/2026
+- Los dos participantes tienen nombre, DNI, edad válida (>= 8) y talle de vestimenta válido
+- Términos y condiciones aceptados
+- El servicio de envío de correos funciona correctamente
+
+**Entrada:**
+- Actividad seleccionada: Tirolesa
+- Fecha seleccionada: "2026-10-17"
+- Horario seleccionado: 10:00hs
+- Cantidad de inscriptos: 2 personas
+- Correo electrónico de contacto: "ana@ejemplo.com"
+- Participante 1: Nombre: "Ana Pérez", DNI: 30111222, Edad: 34, Talle: "M"
+- Participante 2: Nombre: "Leo Pérez", DNI: 50111222, Edad: 10, Talle: "S"
+
+**Resultado esperado:**
+- Estado de la operación: EXITOSA
+- Mensaje: "Inscripción para Tirolesa realizada con éxito (2 cupos reservados)"
+- Estado del correo: "SENT"
+- La respuesta incluye número de inscripción único (ej. "EHP-000123")
+- La respuesta incluye actividad ("Tirolesa"), fecha ("2026-10-17") y horario ("10:00")
+- La respuesta incluye el detalle de cada participante con su código QR individual asignado

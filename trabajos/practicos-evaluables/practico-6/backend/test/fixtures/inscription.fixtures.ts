@@ -2,13 +2,15 @@ export const createParticipantRawFixture = (overrides: Record<string, any> = {})
     nombre: 'Felipe',
     dni: 30784219,
     edad: 42,
+    talleVestimenta: null,
     talleCalzado: null,
     ...overrides,
 });
 
 export const createRegisterInscriptionRawFixture = (overrides: Record<string, any> = {}) => ({
-    actividad: 'Tirolesa',
+    actividad: 'Safari',
     horario: '10:00',
+    fecha: '2026-10-16',
     cantidad: 1,
     userId: 1,
     aceptaTerminos: true,
@@ -18,10 +20,15 @@ export const createRegisterInscriptionRawFixture = (overrides: Record<string, an
 });
 
 export const createClothFixture = (overrides: Record<string, any> = {}) => ({
-    tipo: 'CALZADO',
-    talleMinimo: 19,
-    talleMaximo: 48,
-    isValidSize: (size: number) => typeof size === 'number' && Number.isInteger(size) && size >= 19 && size <= 48,
+    tipo: 'VESTIMENTA',
+    talleMinimo: 'XS',
+    talleMaximo: 'XXL',
+    tallesValidos: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
+    isValidSize: (size: any) => {
+        if (typeof size === 'string') return ['XS', 'S', 'M', 'L', 'XL', 'XXL'].includes(size);
+        if (typeof size === 'number') return Number.isInteger(size) && size >= 19 && size <= 48;
+        return false;
+    },
     ...overrides,
 });
 
@@ -43,15 +50,25 @@ export const createTimeSlotFixture = (overrides: Record<string, any> = {}) => {
 };
 
 export const createActivityFixture = (overrides: Record<string, any> = {}) => {
+    const name = overrides.name ?? 'Tirolesa';
     const cloth = overrides.cloth !== undefined ? overrides.cloth : null;
+    const minAge = overrides.minAge !== undefined
+        ? overrides.minAge
+        : (name === 'Tirolesa' ? 8 : (name === 'Palestra' ? 12 : undefined));
+    const maxCapacityActivity = overrides.maxCapacityActivity !== undefined
+        ? overrides.maxCapacityActivity
+        : (name === 'Safari' ? 8 : (name === 'Tirolesa' ? 10 : (name === 'Palestra' ? 12 : (name === 'Jardineria' ? 12 : undefined))));
+
     return {
         id: overrides.id ?? 1,
-        name: overrides.name ?? 'Tirolesa',
+        name,
         enabled: overrides.enabled !== undefined ? overrides.enabled : true,
         cloth,
+        minAge,
+        maxCapacityActivity,
         isAvailable: () => overrides.enabled !== undefined ? overrides.enabled : true,
         requiresCloth: () => cloth !== null,
-        validateCloth: (size: number) => !cloth || (cloth.isValidSize ? cloth.isValidSize(size) : true),
+        validateCloth: (size: any) => !cloth || (cloth.isValidSize ? cloth.isValidSize(size) : true),
         ...overrides,
     };
 };
@@ -66,6 +83,7 @@ export const createInscriptionFixture = (overrides: Record<string, any> = {}) =>
     id: overrides.id ?? 1,
     activityId: overrides.activityId ?? 1,
     timeSlotId: overrides.timeSlotId ?? 1,
+    fecha: overrides.fecha ?? '2026-10-16',
     quantity: overrides.quantity ?? 1,
     participants: overrides.participants ?? [createParticipantRawFixture()],
     contactEmail: overrides.contactEmail ?? 'felipe@ejemplo.com',

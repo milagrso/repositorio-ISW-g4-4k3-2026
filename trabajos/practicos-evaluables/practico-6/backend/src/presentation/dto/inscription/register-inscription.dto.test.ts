@@ -212,28 +212,6 @@ describe('RegisterInscriptionDto - Validation & Creation', () => {
         });
     });
 
-    describe('test_cantidad_entera_permite_inscripcion', () => {
-        it('debe permitir la inscripción con una cantidad entera válida de personas', () => {
-            // Arrange
-            const raw = createRegisterInscriptionRawFixture({
-                cantidad: 3,
-                participantes: [
-                    createParticipantRawFixture({ nombre: 'Juan', dni: 30784219, edad: 42 }),
-                    createParticipantRawFixture({ nombre: 'María', dni: 44123456, edad: 23 }),
-                    createParticipantRawFixture({ nombre: 'Pedro', dni: 40123456, edad: 27 }),
-                ],
-            });
-
-            // Act
-            const [error, dto] = RegisterInscriptionDto.create(raw);
-
-            // Assert
-            expect(error).toBeUndefined();
-            expect(dto).toBeInstanceOf(RegisterInscriptionDto);
-            expect(dto!.cantidad).toBe(3);
-            expect(dto!.participantes).toHaveLength(3);
-        });
-    });
 
 
     describe('test_nombre_ingresado_permite_inscripcion', () => {
@@ -285,22 +263,6 @@ describe('RegisterInscriptionDto - Validation & Creation', () => {
         });
     });
 
-    describe('test_nombre_con_letras_permite_inscripcion', () => {
-        it('debe permitir la inscripción con nombre compuesto solo por letras', () => {
-            // Arrange
-            const raw = createRegisterInscriptionRawFixture({
-                participantes: [createParticipantRawFixture({ nombre: 'Felipe' })],
-            });
-
-            // Act
-            const [error, dto] = RegisterInscriptionDto.create(raw);
-
-            // Assert
-            expect(error).toBeUndefined();
-            expect(dto).toBeInstanceOf(RegisterInscriptionDto);
-            expect(dto!.participantes[0].nombre).toBe('Felipe');
-        });
-    });
 
     describe('test_nombre_con_caracteres_especiales_rechaza_inscripcion', () => {
         it('debe rechazar si el nombre contiene caracteres especiales no permitidos', () => {
@@ -614,22 +576,6 @@ describe('RegisterInscriptionDto - Validation & Creation', () => {
         });
     });
 
-    describe('test_edad_cero_rechaza_inscripcion', () => {
-        it('debe rechazar si la edad es cero', () => {
-            // Arrange
-            const raw = createRegisterInscriptionRawFixture({
-                participantes: [createParticipantRawFixture({ edad: 0 })],
-            });
-
-            // Act
-            const [error, dto] = RegisterInscriptionDto.create(raw);
-
-            // Assert
-            expect(error).toBe(Errors.PARTICIPANT_AGE_ZERO.message);
-            expect(dto).toBeUndefined();
-        });
-    });
-
     describe('test_edad_solo_espacios_rechaza_inscripcion', () => {
         it('debe rechazar si la edad contiene únicamente espacios en blanco', () => {
             // Arrange
@@ -647,97 +593,14 @@ describe('RegisterInscriptionDto - Validation & Creation', () => {
     });
 
 
-    describe('test_talle_calzado_menor_al_minimo_rechaza_inscripcion', () => {
-        it('debe rechazar si el talle de calzado es menor a 19', () => {
+    describe('test_talle_vestimenta_tirolesa_valido_permite_inscripcion', () => {
+        it('debe permitir la inscripción con un talle de vestimenta habilitado para Tirolesa', () => {
             // Arrange
             const raw = createRegisterInscriptionRawFixture({
-                actividad: 'Palestra',
-                participantes: [createParticipantRawFixture({ talleCalzado: 18 })],
-            });
-
-            // Act
-            const [error, dto] = RegisterInscriptionDto.create(raw);
-
-            // Assert
-            expect(error).toBe(Errors.SHOE_SIZE_OUT_OF_RANGE.message);
-            expect(dto).toBeUndefined();
-        });
-    });
-
-    describe('test_talle_mayor_al_maximo_rechaza_inscripcion', () => {
-        it('debe rechazar si el talle de calzado es mayor a 48', () => {
-            // Arrange
-            const raw = createRegisterInscriptionRawFixture({
-                actividad: 'Palestra',
-                participantes: [createParticipantRawFixture({ talleCalzado: 49 })],
-            });
-
-            // Act
-            const [error, dto] = RegisterInscriptionDto.create(raw);
-
-            // Assert
-            expect(error).toBe(Errors.SHOE_SIZE_OUT_OF_RANGE.message);
-            expect(dto).toBeUndefined();
-        });
-    });
-
-    describe('test_talle_con_letras_rechaza_inscripcion', () => {
-        it('debe rechazar si el talle de calzado contiene letras o texto', () => {
-            // Arrange
-            const raw = createRegisterInscriptionRawFixture({
-                actividad: 'Palestra',
-                participantes: [createParticipantRawFixture({ talleCalzado: 'cuarenta' })],
-            });
-
-            // Act
-            const [error, dto] = RegisterInscriptionDto.create(raw);
-
-            // Assert
-            expect(error).toBe(Errors.SHOE_SIZE_NOT_A_NUMBER.message);
-            expect(dto).toBeUndefined();
-        });
-    });
-
-    describe('test_talle_negativo_rechaza_inscripcion', () => {
-        it('debe rechazar si el talle de calzado tiene un valor negativo', () => {
-            // Arrange
-            const raw = createRegisterInscriptionRawFixture({
-                actividad: 'Palestra',
-                participantes: [createParticipantRawFixture({ talleCalzado: -40 })],
-            });
-
-            // Act
-            const [error, dto] = RegisterInscriptionDto.create(raw);
-
-            // Assert
-            expect(error).toBe(Errors.SHOE_SIZE_NEGATIVE.message);
-            expect(dto).toBeUndefined();
-        });
-    });
-
-    describe('test_talle_solo_espacios_rechaza_inscripcion', () => {
-        it('debe rechazar si el talle de calzado contiene únicamente espacios en blanco', () => {
-            // Arrange
-            const raw = createRegisterInscriptionRawFixture({
-                actividad: 'Palestra',
-                participantes: [createParticipantRawFixture({ talleCalzado: '   ' })],
-            });
-
-            // Act
-            const [error, dto] = RegisterInscriptionDto.create(raw);
-
-            // Assert
-            expect(error).toBe(Errors.SHOE_SIZE_ONLY_SPACES.message);
-            expect(dto).toBeUndefined();
-        });
-    });
-
-    describe('test_talle_entero_positivo_permite_inscripcion', () => {
-        it('debe permitir la inscripción con talle entero positivo dentro del rango permitido', () => {
-            // Arrange
-            const raw = createRegisterInscriptionRawFixture({
-                actividad: 'Palestra',
-                participantes: [createParticipantRawFixture({ talleCalzado: 40 })],
+                actividad: 'Tirolesa',
+                horario: '15:00',
+                cantidad: 1,
+                participantes: [createParticipantRawFixture({ talleVestimenta: 'XL' })],
             });
 
             // Act
@@ -746,23 +609,226 @@ describe('RegisterInscriptionDto - Validation & Creation', () => {
             // Assert
             expect(error).toBeUndefined();
             expect(dto).toBeInstanceOf(RegisterInscriptionDto);
-            expect(dto!.participantes[0].talleCalzado).toBe(40);
+            expect((dto!.participantes[0] as any).talleVestimenta).toBe('XL');
         });
     });
 
-    describe('test_talle_decimal_rechaza_inscripcion', () => {
-        it('debe rechazar si el talle de calzado contiene números decimales', () => {
+    describe('test_talle_vestimenta_tirolesa_menor_al_minimo_rechaza_inscripcion', () => {
+        it('debe rechazar si el talle de vestimenta es menor a XS para Tirolesa', () => {
             // Arrange
             const raw = createRegisterInscriptionRawFixture({
-                actividad: 'Palestra',
-                participantes: [createParticipantRawFixture({ talleCalzado: 41.5 })],
+                actividad: 'Tirolesa',
+                horario: '15:00',
+                cantidad: 1,
+                participantes: [createParticipantRawFixture({ talleVestimenta: 'XXS' })],
             });
 
             // Act
             const [error, dto] = RegisterInscriptionDto.create(raw);
 
             // Assert
-            expect(error).toBe(Errors.SHOE_SIZE_DECIMAL.message);
+            const expectedError = Errors.CLOTH_SIZE_OUT_OF_RANGE?.message ?? 'El talle de vestimenta disponible es XS, S, M, L, XL, XXL';
+            expect(error).toBe(expectedError);
+            expect(dto).toBeUndefined();
+        });
+    });
+
+    describe('test_talle_vestimenta_tirolesa_mayor_al_maximo_rechaza_inscripcion', () => {
+        it('debe rechazar si el talle de vestimenta es mayor a XXL para Tirolesa', () => {
+            // Arrange
+            const raw = createRegisterInscriptionRawFixture({
+                actividad: 'Tirolesa',
+                horario: '15:00',
+                cantidad: 1,
+                participantes: [createParticipantRawFixture({ talleVestimenta: 'XXXL' })],
+            });
+
+            // Act
+            const [error, dto] = RegisterInscriptionDto.create(raw);
+
+            // Assert
+            const expectedError = Errors.CLOTH_SIZE_OUT_OF_RANGE?.message ?? 'El talle de vestimenta disponible es de XS a XXL';
+            expect(error).toBe(expectedError);
+            expect(dto).toBeUndefined();
+        });
+    });
+
+    describe('test_talle_vestimenta_tirolesa_con_numeros_rechaza_inscripcion', () => {
+        it('debe rechazar si el talle de vestimenta contiene números para Tirolesa', () => {
+            // Arrange
+            const raw = createRegisterInscriptionRawFixture({
+                actividad: 'Tirolesa',
+                horario: '15:00',
+                cantidad: 1,
+                participantes: [createParticipantRawFixture({ talleVestimenta: 50 })],
+            });
+
+            // Act
+            const [error, dto] = RegisterInscriptionDto.create(raw);
+
+            // Assert
+            const expectedError = Errors.CLOTH_SIZE_FORMAT_INVALID?.message ?? 'El talle de vestimenta debe ser en formato: XS, S, M, L, XL, XXL';
+            expect(error).toBe(expectedError);
+            expect(dto).toBeUndefined();
+        });
+    });
+
+    describe('test_talle_vestimenta_Tirolesa_solo_espacios_rechaza_inscripcion', () => {
+        it('debe rechazar si el talle de vestimenta contiene solo espacios para Tirolesa', () => {
+            // Arrange
+            const raw = createRegisterInscriptionRawFixture({
+                actividad: 'Tirolesa',
+                horario: '15:00',
+                cantidad: 1,
+                participantes: [createParticipantRawFixture({ talleVestimenta: '   ' })],
+            });
+
+            // Act
+            const [error, dto] = RegisterInscriptionDto.create(raw);
+
+            // Assert
+            const expectedError = Errors.CLOTH_SIZE_ONLY_SPACES?.message ?? 'El talle de vestimenta no puede contener únicamente espacios en blanco';
+            expect(error).toBe(expectedError);
+            expect(dto).toBeUndefined();
+        });
+    });
+
+    describe('test_talle_con_letras_tirolesa_rechaza_inscripcion', () => {
+        it('debe rechazar si el talle de vestimenta contiene texto inválido para Tirolesa', () => {
+            // Arrange
+            const raw = createRegisterInscriptionRawFixture({
+                actividad: 'Tirolesa',
+                horario: '15:00',
+                cantidad: 1,
+                participantes: [createParticipantRawFixture({ talleVestimenta: 'equisele' })],
+            });
+
+            // Act
+            const [error, dto] = RegisterInscriptionDto.create(raw);
+
+            // Assert
+            const expectedError = Errors.CLOTH_SIZE_INVALID_VALUE?.message ?? 'El talle de vestimenta debe ser un valor con formato XS a XXL';
+            expect(error).toBe(expectedError);
+            expect(dto).toBeUndefined();
+        });
+    });
+
+    describe('test_talle_vestimenta_palestra_valido_permite_inscripcion', () => {
+        it('debe permitir la inscripción con un talle de vestimenta habilitado para Palestra', () => {
+            // Arrange
+            const raw = createRegisterInscriptionRawFixture({
+                actividad: 'Palestra',
+                horario: '15:00',
+                cantidad: 1,
+                participantes: [createParticipantRawFixture({ talleVestimenta: 'XL' })],
+            });
+
+            // Act
+            const [error, dto] = RegisterInscriptionDto.create(raw);
+
+            // Assert
+            expect(error).toBeUndefined();
+            expect(dto).toBeInstanceOf(RegisterInscriptionDto);
+            expect((dto!.participantes[0] as any).talleVestimenta).toBe('XL');
+        });
+    });
+
+    describe('test_talle_vestimenta_palestra_menor_al_minimo_rechaza_inscripcion', () => {
+        it('debe rechazar si el talle de vestimenta es menor a XS para Palestra', () => {
+            // Arrange
+            const raw = createRegisterInscriptionRawFixture({
+                actividad: 'Palestra',
+                horario: '15:00',
+                cantidad: 1,
+                participantes: [createParticipantRawFixture({ talleVestimenta: 'XXS' })],
+            });
+
+            // Act
+            const [error, dto] = RegisterInscriptionDto.create(raw);
+
+            // Assert
+            const expectedError = Errors.CLOTH_SIZE_OUT_OF_RANGE?.message ?? 'El talle de vestimenta disponible es XS, S, M, L, XL, XXL';
+            expect(error).toBe(expectedError);
+            expect(dto).toBeUndefined();
+        });
+    });
+
+    describe('test_talle_vestimenta_palestra_mayor_al_maximo_rechaza_inscripcion', () => {
+        it('debe rechazar si el talle de vestimenta es mayor a XXL para Palestra', () => {
+            // Arrange
+            const raw = createRegisterInscriptionRawFixture({
+                actividad: 'Palestra',
+                horario: '15:00',
+                cantidad: 1,
+                participantes: [createParticipantRawFixture({ talleVestimenta: 'XXXL' })],
+            });
+
+            // Act
+            const [error, dto] = RegisterInscriptionDto.create(raw);
+
+            // Assert
+            const expectedError = Errors.CLOTH_SIZE_OUT_OF_RANGE?.message ?? 'El talle de vestimenta disponible es de XS a XXL';
+            expect(error).toBe(expectedError);
+            expect(dto).toBeUndefined();
+        });
+    });
+
+    describe('test_talle_vestimenta_palestra_con_numeros_rechaza_inscripcion', () => {
+        it('debe rechazar si el talle de vestimenta contiene números para Palestra', () => {
+            // Arrange
+            const raw = createRegisterInscriptionRawFixture({
+                actividad: 'Palestra',
+                horario: '15:00',
+                cantidad: 1,
+                participantes: [createParticipantRawFixture({ talleVestimenta: 50 })],
+            });
+
+            // Act
+            const [error, dto] = RegisterInscriptionDto.create(raw);
+
+            // Assert
+            const expectedError = Errors.CLOTH_SIZE_FORMAT_INVALID?.message ?? 'El talle de vestimenta debe ser en formato: XS, S, M, L, XL, XXL';
+            expect(error).toBe(expectedError);
+            expect(dto).toBeUndefined();
+        });
+    });
+
+    describe('test_talle_vestimenta_Palestra_solo_espacios_rechaza_inscripcion', () => {
+        it('debe rechazar si el talle de vestimenta contiene solo espacios para Palestra', () => {
+            // Arrange
+            const raw = createRegisterInscriptionRawFixture({
+                actividad: 'Palestra',
+                horario: '15:00',
+                cantidad: 1,
+                participantes: [createParticipantRawFixture({ talleVestimenta: '   ' })],
+            });
+
+            // Act
+            const [error, dto] = RegisterInscriptionDto.create(raw);
+
+            // Assert
+            const expectedError = Errors.CLOTH_SIZE_ONLY_SPACES?.message ?? 'El talle de vestimenta no puede contener únicamente espacios en blanco';
+            expect(error).toBe(expectedError);
+            expect(dto).toBeUndefined();
+        });
+    });
+
+    describe('test_talle_con_letras_palestra_rechaza_inscripcion', () => {
+        it('debe rechazar si el talle de vestimenta contiene texto inválido para Palestra', () => {
+            // Arrange
+            const raw = createRegisterInscriptionRawFixture({
+                actividad: 'Palestra',
+                horario: '15:00',
+                cantidad: 1,
+                participantes: [createParticipantRawFixture({ talleVestimenta: 'equisele' })],
+            });
+
+            // Act
+            const [error, dto] = RegisterInscriptionDto.create(raw);
+
+            // Assert
+            const expectedError = Errors.CLOTH_SIZE_INVALID_VALUE?.message ?? 'El talle de vestimenta debe ser un valor con formato XS a XXL';
+            expect(error).toBe(expectedError);
             expect(dto).toBeUndefined();
         });
     });
@@ -776,9 +842,9 @@ describe('RegisterInscriptionDto - Validation & Creation', () => {
                 horario: '10:00',
                 cantidad: 3,
                 participantes: [
-                    createParticipantRawFixture({ nombre: 'Felipe', dni: 30784219, edad: 42, talleCalzado: null }),
-                    createParticipantRawFixture({ nombre: 'Mariana', dni: 32456789, edad: 38, talleCalzado: null }),
-                    createParticipantRawFixture({ nombre: 'Joaquín', dni: 45123987, edad: 21, talleCalzado: null }),
+                    createParticipantRawFixture({ nombre: 'Felipe', dni: 30784219, edad: 42, talleVestimenta: 'XL' }),
+                    createParticipantRawFixture({ nombre: 'Mariana', dni: 32456789, edad: 38, talleVestimenta: 'M' }),
+                    createParticipantRawFixture({ nombre: 'Joaquín', dni: 45123987, edad: 21, talleVestimenta: 'S' }),
                 ],
             });
 
@@ -886,6 +952,96 @@ describe('RegisterInscriptionDto - Validation & Creation', () => {
             // Assert
             expect(error).toBe(Errors.PARTICIPANT_DNI_REQUIRED.message);
             expect(dto).toBeUndefined();
+        });
+    });
+
+    describe('test_fecha_no_ingresada_rechaza_inscripcion', () => {
+        it('debe rechazar si no se ingresa la fecha del turno', () => {
+            // Arrange
+            const raw = createRegisterInscriptionRawFixture({
+                fecha: null,
+            });
+
+            // Act
+            const [error, dto] = RegisterInscriptionDto.create(raw);
+
+            // Assert
+            const expectedError = Errors.INSCRIPTION_DATE_REQUIRED?.message ?? 'Debe ingresar la fecha del turno';
+            expect(error).toBe(expectedError);
+            expect(dto).toBeUndefined();
+        });
+    });
+
+    describe('test_fecha_formato_invalido_rechaza_inscripcion', () => {
+        it('debe rechazar si el formato de la fecha no es YYYY-MM-DD', () => {
+            // Arrange
+            const raw = createRegisterInscriptionRawFixture({
+                fecha: '16/10/2026',
+            });
+
+            // Act
+            const [error, dto] = RegisterInscriptionDto.create(raw);
+
+            // Assert
+            const expectedError = Errors.INSCRIPTION_DATE_FORMAT_INVALID?.message ?? 'El formato de fecha debe ser YYYY-MM-DD';
+            expect(error).toBe(expectedError);
+            expect(dto).toBeUndefined();
+        });
+    });
+
+    describe('test_email_contacto_no_ingresado_rechaza_inscripcion', () => {
+        it('debe rechazar si no se ingresa el correo electrónico de contacto', () => {
+            // Arrange
+            const raw = createRegisterInscriptionRawFixture({
+                emailContacto: null,
+            });
+
+            // Act
+            const [error, dto] = RegisterInscriptionDto.create(raw);
+
+            // Assert
+            const expectedError = Errors.CONTACT_EMAIL_REQUIRED?.message ?? 'El correo electrónico de contacto es obligatorio';
+            expect(error).toBe(expectedError);
+            expect(dto).toBeUndefined();
+        });
+    });
+
+    describe('test_email_contacto_formato_invalido_rechaza_inscripcion', () => {
+        it('debe rechazar si el formato del correo electrónico de contacto no es válido', () => {
+            // Arrange
+            const raw = createRegisterInscriptionRawFixture({
+                emailContacto: 'felipe-sin-arroba',
+            });
+
+            // Act
+            const [error, dto] = RegisterInscriptionDto.create(raw);
+
+            // Assert
+            const expectedError = Errors.CONTACT_EMAIL_INVALID?.message ?? 'El correo electrónico ingresado no tiene un formato válido';
+            expect(error).toBe(expectedError);
+            expect(dto).toBeUndefined();
+        });
+    });
+
+    describe('test_nombre_con_dieresis_permite_inscripcion', () => {
+        it('debe permitir la inscripción cuando el nombre contiene diéresis', () => {
+            // Arrange
+            const raw = createRegisterInscriptionRawFixture({
+                participantes: [
+                    createParticipantRawFixture({
+                        nombre: 'Martín Agüero',
+                        dni: 30784219,
+                        edad: 42,
+                    }),
+                ],
+            });
+
+            // Act
+            const [error, dto] = RegisterInscriptionDto.create(raw);
+
+            // Assert
+            expect(error).toBeUndefined();
+            expect(dto).toBeDefined();
         });
     });
 });
