@@ -24,6 +24,19 @@ ActivityModel.init({
     cloth: {
         type: DataTypes.JSON,
         allowNull: true
+    },
+    minAge: {
+        type: DataTypes.INTEGER,
+        allowNull: true,
+        defaultValue: 0
+    },
+    maxCapacityActivity: {
+        type: DataTypes.INTEGER,
+        allowNull: true
+    },
+    termsAndConditions: {
+        type: DataTypes.TEXT,
+        allowNull: true
     }
 }, {
     sequelize,

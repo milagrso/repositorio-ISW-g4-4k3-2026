@@ -9,8 +9,24 @@ export class InscriptionRepository_I implements InscriptionRepository {
         this.dataSource = new PostgresInscriptionDataSource();
     }
 
-    public reserveSlots(timeSlotId: string | number, quantity: number): Promise<boolean> {
-        return this.dataSource.reserveSlots(timeSlotId, quantity);
+    public findAll(): Promise<InscriptionEntity[]> {
+        return this.dataSource.findAll();
+    }
+
+    public findById(id: string | number): Promise<InscriptionEntity | null> {
+        return this.dataSource.findById(id);
+    }
+
+    public hasActiveInscriptionForParticipant(dni: number, horario?: string, fecha?: string): Promise<boolean> {
+        return this.dataSource.hasActiveInscriptionForParticipant(dni, horario, fecha);
+    }
+
+    public findActiveByParticipantDniAndSchedule(dni: number, horario?: string, fecha?: string): Promise<InscriptionEntity | null> {
+        return this.dataSource.findActiveByParticipantDniAndSchedule(dni, horario, fecha);
+    }
+
+    public reserveSlots(timeSlotId: string | number, quantity: number, fecha?: string): Promise<boolean> {
+        return this.dataSource.reserveSlots(timeSlotId, quantity, fecha);
     }
 
     public save(inscription: InscriptionEntity | any): Promise<InscriptionEntity | any> {

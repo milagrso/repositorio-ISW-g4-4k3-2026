@@ -46,6 +46,14 @@ InscriptionModel.init({
         allowNull: false,
         defaultValue: 'REGISTERED'
     },
+    fecha: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    numeroInscripcion: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
     createdAt: {
         type: DataTypes.DATE,
         allowNull: false,

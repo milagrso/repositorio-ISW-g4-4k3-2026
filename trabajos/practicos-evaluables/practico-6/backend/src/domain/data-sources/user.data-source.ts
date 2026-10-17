@@ -1,3 +1,8 @@
+import { UserEntity } from '../entities/user.entity';
+
 export abstract class UserDataSource {
-    public abstract findById(id: string | number): Promise<any>;
+    public abstract findAll(): Promise<UserEntity[]>;
+    public abstract findById(id: string | number): Promise<UserEntity | null>;
+    public abstract findByEmail(email: string): Promise<UserEntity | null>;
+    public abstract findSessionUser(): Promise<UserEntity | null>;
 }

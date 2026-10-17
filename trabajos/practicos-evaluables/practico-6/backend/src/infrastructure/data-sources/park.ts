@@ -1,10 +1,21 @@
 import { ParkModel } from '../postgresql/models/park.model';
-import { ParkDataSource } from '../../domain';
+import { ParkDataSource, ParkEntity } from '../../domain';
 
 export class PostgresParkDataSource implements ParkDataSource {
 
     constructor() {
         ParkModel.sync();
+    }
+
+    public async findAll(): Promise<ParkEntity[]> {
+        const parks = await ParkModel.findAll();
+        return parks.map((p) => ParkEntity.fromObject(p.dataValues));
+    }
+
+    public async findById(id: string | number): Promise<ParkEntity | null> {
+        const park = await ParkModel.findByPk(id);
+        if (!park) return null;
+        return ParkEntity.fromObject(park.dataValues);
     }
 
     public async isOpenAt(time: string): Promise<boolean> {

@@ -1,4 +1,4 @@
-import { UserRepository } from '../../domain';
+import { UserEntity, UserRepository } from '../../domain';
 import { PostgresUserDataSource } from '../data-sources/user';
 
 export class UserRepository_I implements UserRepository {
@@ -9,7 +9,19 @@ export class UserRepository_I implements UserRepository {
         this.dataSource = new PostgresUserDataSource();
     }
 
-    public findById(id: string | number): Promise<any> {
+    public findAll(): Promise<UserEntity[]> {
+        return this.dataSource.findAll();
+    }
+
+    public findById(id: string | number): Promise<UserEntity | null> {
         return this.dataSource.findById(id);
+    }
+
+    public findByEmail(email: string): Promise<UserEntity | null> {
+        return this.dataSource.findByEmail(email);
+    }
+
+    public findSessionUser(): Promise<UserEntity | null> {
+        return this.dataSource.findSessionUser();
     }
 }

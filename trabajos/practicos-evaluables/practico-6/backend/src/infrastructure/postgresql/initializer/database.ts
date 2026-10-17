@@ -23,6 +23,9 @@ export class PostgreSQLDatabase {
 
             console.log("Connected to PostgreSQL");
 
+            const { SeederHelper } = await import('../../helpers/seeder.helper');
+            await SeederHelper.seed();
+
             return true;
         }catch(error){
             throw error;
