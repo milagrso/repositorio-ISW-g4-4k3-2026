@@ -13,4 +13,6 @@ export const env = {
     MAIL_USER: get('MAIL_USER').required().asString(),
     MAIL_PASS: get('MAIL_PASS').required().asString(),
     MAIL_FROM: get('MAIL_FROM').required().asString(),
+    SESSION_USER_EMAIL: get('SESSION_USER_EMAIL').default(get('SEED_USER_EMAIL').default('felipe@ejemplo.com').asString()).asString(),
+    SEED_USER_EMAIL: get('SEED_USER_EMAIL').default(get('SESSION_USER_EMAIL').default('felipe@ejemplo.com').asString()).asString(),
 };
