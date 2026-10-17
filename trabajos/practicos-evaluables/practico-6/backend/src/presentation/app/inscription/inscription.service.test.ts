@@ -41,6 +41,8 @@ describe('Pruebas unitarias para el InscriptionService', () => {
         inscriptionRepositoryMock = {
             reserveSlots: jest.fn().mockResolvedValue(true),
             save: jest.fn().mockImplementation((insc) => Promise.resolve(createInscriptionFixture(insc))),
+            hasActiveInscriptionForParticipant: jest.fn().mockResolvedValue(false),
+            findActiveByParticipantDniAndSchedule: jest.fn().mockResolvedValue(null),
         } as unknown as jest.Mocked<InscriptionRepository>;
 
         userRepositoryMock = {

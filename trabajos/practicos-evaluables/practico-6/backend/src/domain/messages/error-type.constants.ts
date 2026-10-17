@@ -237,4 +237,26 @@ export const Errors: Record<string, AppError> = {
         statusCode: 400,
         message: 'El parque está cerrado en la fecha seleccionada',
     },
+
+    // Not Found & Catalog Entities
+    ACTIVITY_NOT_FOUND: {
+        statusCode: 404,
+        message: 'Actividad no encontrada',
+    },
+    TIME_SLOT_NOT_FOUND: {
+        statusCode: 404,
+        message: 'Turno no encontrado',
+    },
+    PARK_NOT_FOUND: {
+        statusCode: 404,
+        message: 'Parque no encontrado',
+    },
+    INSCRIPTION_NOT_FOUND: {
+        statusCode: 404,
+        message: 'Inscripción no encontrada',
+    },
+    USER_NOT_FOUND: {
+        statusCode: 404,
+        message: 'Usuario de sesión no encontrado',
+    },
 };

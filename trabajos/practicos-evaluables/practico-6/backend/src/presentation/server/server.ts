@@ -27,7 +27,7 @@ export class Server {
         this.app.use(cors({ 
             origin: true, 
             credentials: true, 
-            exposedHeaders: ["Authorization"] 
+            exposedHeaders: ["Authorization", "Date"] 
         }));
 
         /* Routes */
