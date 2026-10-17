@@ -5,7 +5,10 @@ export class ActivityEntity {
         public id: string | number,
         public name: string,
         public enabled: boolean = true,
-        public cloth: ClothEntity | null = null
+        public cloth: ClothEntity | null = null,
+        public minAge?: number,
+        public maxCapacityActivity?: number,
+        public termsAndConditions?: string
     ) {}
 
     isAvailable(): boolean {
@@ -16,13 +19,22 @@ export class ActivityEntity {
         return this.cloth !== null;
     }
 
-    validateCloth(size: number): boolean {
+    validateCloth(size: any): boolean {
         if (!this.cloth) return true;
         return this.cloth.isValidSize(size);
     }
 
     static fromObject(object: { [key: string]: any }): ActivityEntity {
-        const { _id, id, name, enabled = true, cloth = null } = object;
+        const {
+            _id,
+            id,
+            name,
+            enabled = true,
+            cloth = null,
+            minAge,
+            maxCapacityActivity,
+            termsAndConditions,
+        } = object;
 
         const clothEntity = cloth
             ? (cloth instanceof ClothEntity ? cloth : ClothEntity.fromObject(cloth))
@@ -32,7 +44,10 @@ export class ActivityEntity {
             _id || id,
             name,
             enabled,
-            clothEntity
+            clothEntity,
+            minAge,
+            maxCapacityActivity,
+            termsAndConditions
         );
     }
 }

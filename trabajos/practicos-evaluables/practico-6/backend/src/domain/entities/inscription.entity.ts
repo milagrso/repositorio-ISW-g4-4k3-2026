@@ -11,7 +11,9 @@ export class InscriptionEntity {
         public qrCode: string,
         public termsAccepted: boolean,
         public status: string = 'REGISTERED',
-        public createdAt: Date = new Date()
+        public createdAt: Date = new Date(),
+        public fecha?: string,
+        public numeroInscripcion?: string
     ) {}
 
     static fromObject(object: { [key: string]: any }): InscriptionEntity {
@@ -27,6 +29,8 @@ export class InscriptionEntity {
             termsAccepted,
             status = 'REGISTERED',
             createdAt = new Date(),
+            fecha,
+            numeroInscripcion,
         } = object;
 
         const participantEntities = participants.map((p: any) =>
@@ -43,7 +47,9 @@ export class InscriptionEntity {
             qrCode,
             termsAccepted,
             status,
-            createdAt instanceof Date ? createdAt : new Date(createdAt)
+            createdAt instanceof Date ? createdAt : new Date(createdAt),
+            fecha,
+            numeroInscripcion
         );
     }
 }

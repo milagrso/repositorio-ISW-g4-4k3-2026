@@ -1,4 +1,5 @@
 // Entities
+export * from './entities/park.entity';
 export * from './entities/participant.entity';
 export * from './entities/cloth.entity';
 export * from './entities/time-slot.entity';

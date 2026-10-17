@@ -165,4 +165,76 @@ export const Errors: Record<string, AppError> = {
         statusCode: 400,
         message: 'Debe aceptar los términos y condiciones',
     },
+
+    // Cloth Size (Vestimenta)
+    CLOTH_SIZE_REQUIRED: {
+        statusCode: 400,
+        message: 'Debe ingresar el talle de vestimenta para completar la inscripción en esta actividad',
+    },
+    CLOTH_SIZE_OUT_OF_RANGE: {
+        statusCode: 400,
+        message: 'El talle de vestimenta disponible es de XS a XXL',
+    },
+    CLOTH_SIZE_FORMAT_INVALID: {
+        statusCode: 400,
+        message: 'El talle de vestimenta debe ser en formato: XS, S, M, L, XL, XXL',
+    },
+    CLOTH_SIZE_ONLY_SPACES: {
+        statusCode: 400,
+        message: 'El talle de vestimenta no puede contener únicamente espacios en blanco',
+    },
+    CLOTH_SIZE_INVALID_VALUE: {
+        statusCode: 400,
+        message: 'El talle de vestimenta debe ser un valor con formato XS a XXL',
+    },
+
+    // Inscription Date & Contact Email
+    INSCRIPTION_DATE_REQUIRED: {
+        statusCode: 400,
+        message: 'Debe ingresar la fecha del turno',
+    },
+    INSCRIPTION_DATE_FORMAT_INVALID: {
+        statusCode: 400,
+        message: 'El formato de fecha debe ser YYYY-MM-DD',
+    },
+    CONTACT_EMAIL_REQUIRED: {
+        statusCode: 400,
+        message: 'El correo electrónico de contacto es obligatorio',
+    },
+    CONTACT_EMAIL_INVALID: {
+        statusCode: 400,
+        message: 'El correo electrónico ingresado no tiene un formato válido',
+    },
+
+    // Minimum Age & Maximum Capacity
+    PARTICIPANT_AGE_BELOW_MINIMUM: {
+        statusCode: 400,
+        message: 'La edad ingresada es menor a la edad mínima establecido para esta actividad',
+    },
+    ACTIVITY_MAX_CAPACITY_EXCEEDED: ((max?: number) => ({
+        statusCode: 400,
+        message: `La cantidad de inscriptos supera la capacidad máxima permitida para esta actividad (máximo ${max})`,
+    })) as any,
+
+    // Booking Windows & Schedule Overlaps
+    BOOKING_TOO_EARLY: {
+        statusCode: 400,
+        message: 'Solo se permiten inscripciones dentro de las 24 horas previas al inicio del turno',
+    },
+    BOOKING_TOO_LATE: {
+        statusCode: 400,
+        message: 'Las inscripciones cierran 15 minutos antes del inicio del turno',
+    },
+    PARTICIPANT_SCHEDULE_OVERLAP: {
+        statusCode: 400,
+        message: 'El participante ya tiene una inscripción en otra actividad durante el horario seleccionado',
+    },
+    GROUP_PARTICIPANT_SCHEDULE_OVERLAP: {
+        statusCode: 400,
+        message: 'Uno o mas participantes ya tienen una inscripción en otra actividad durante el horario seleccionado',
+    },
+    PARK_CLOSED_ON_DATE: {
+        statusCode: 400,
+        message: 'El parque está cerrado en la fecha seleccionada',
+    },
 };
