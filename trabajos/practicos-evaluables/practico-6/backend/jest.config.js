@@ -9,7 +9,12 @@ module.exports = {
                 jsc: {
                     parser: {
                         syntax: 'typescript',
+                        decorators: true,
                         dynamicImport: true,
+                    },
+                    transform: {
+                        legacyDecorator: true,
+                        decoratorMetadata: true,
                     },
                 },
                 module: {
