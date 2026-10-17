@@ -7,11 +7,9 @@ import { QrHelper } from '../../../infrastructure/helpers/qr.helper';
 import { ServiceError } from '../../../domain/messages/service.error';
 import { Errors } from '../../../domain/messages/error-type.constants';
 import { RegisterInscriptionDto } from '../../dto/inscription/register-inscription.dto';
-import { EmailStatus, RegisterInscriptionResponse, ErrorResponse } from '../../dto/inscription/register-inscription.res';
+import { EmailStatus, RegisterInscriptionResponse } from '../../dto/inscription/register-inscription.res';
 import { InscriptionEntity } from '../../../domain/entities/inscription.entity';
-import { ApiTag, ApiOperation } from '../../swagger/swagger.decorators';
 
-@ApiTag('Inscripciones', 'Endpoints de registro y gestión de reservas en actividades')
 export class InscriptionService {
     constructor(
         private readonly parkRepository: ParkRepository,
@@ -22,27 +20,6 @@ export class InscriptionService {
         private readonly qrHelper: QrHelper,
     ) {}
 
-    @ApiOperation({
-        path: ['/api/inscriptions/register', '/api/inscriptions'],
-        method: 'post',
-        tags: ['Inscripciones'],
-        summary: 'Registrar una nueva inscripción',
-        description: 'Registra la inscripción para una actividad en un turno y fecha específicos, validando cupos, edad mínima, talle de vestimenta, ventana de 24h y solapamiento de horarios.',
-        requestBody: {
-            required: true,
-            schema: RegisterInscriptionDto,
-        },
-        responses: {
-            '201': {
-                description: 'Inscripción registrada con éxito',
-                schema: RegisterInscriptionResponse,
-            },
-            '400': {
-                description: 'Error de validación de datos o regla de negocio',
-                schema: ErrorResponse,
-            },
-        },
-    })
     public async register(dto: RegisterInscriptionDto): Promise<RegisterInscriptionResponse> {
         // 1. Validar calendario del parque si dto.fecha está presente (cerrado lunes, 25/12, 01/01)
         if (dto.fecha) {
