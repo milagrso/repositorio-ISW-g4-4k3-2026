@@ -19,7 +19,7 @@ export class PostgreSQLDatabase {
     public async connect() {
         try{
             await this.sequelize.authenticate();
-            await this.sequelize.sync();
+            await this.sequelize.sync({ alter: true });
 
             console.log("Connected to PostgreSQL");
 

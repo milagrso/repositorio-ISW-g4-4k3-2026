@@ -6,8 +6,8 @@ import { InscriptionDataSource, InscriptionEntity } from '../../domain';
 export class PostgresInscriptionDataSource implements InscriptionDataSource {
 
     constructor() {
-        InscriptionModel.sync();
-        TimeSlotModel.sync();
+        InscriptionModel.sync({ alter: true });
+        TimeSlotModel.sync({ alter: true });
     }
 
     public async findAll(): Promise<InscriptionEntity[]> {
@@ -16,7 +16,9 @@ export class PostgresInscriptionDataSource implements InscriptionDataSource {
     }
 
     public async findById(id: string | number): Promise<InscriptionEntity | null> {
-        const inscription = await InscriptionModel.findByPk(id);
+        const num = Number(id);
+        if (!Number.isInteger(num) || num <= 0) return null;
+        const inscription = await InscriptionModel.findByPk(num);
         if (!inscription) return null;
         return InscriptionEntity.fromObject(inscription.dataValues);
     }

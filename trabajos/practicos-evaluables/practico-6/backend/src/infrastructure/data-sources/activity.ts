@@ -7,8 +7,13 @@ import { ActivityDataSource, ActivityEntity, TimeSlotEntity } from '../../domain
 export class PostgresActivityDataSource implements ActivityDataSource {
 
     constructor() {
-        ActivityModel.sync();
-        TimeSlotModel.sync();
+        ActivityModel.sync({ alter: true });
+        TimeSlotModel.sync({ alter: true });
+    }
+
+    private isValidId(id: string | number): boolean {
+        const num = Number(id);
+        return Number.isInteger(num) && num > 0;
     }
 
     private async calculateOccupiedSlots(timeSlotId: number | string, fecha?: string): Promise<number> {
@@ -33,7 +38,8 @@ export class PostgresActivityDataSource implements ActivityDataSource {
     }
 
     public async findById(id: string | number): Promise<ActivityEntity | null> {
-        const activity = await ActivityModel.findByPk(id);
+        if (!this.isValidId(id)) return null;
+        const activity = await ActivityModel.findByPk(Number(id));
         if (!activity) return null;
         return ActivityEntity.fromObject(activity.dataValues);
     }
@@ -87,7 +93,8 @@ export class PostgresActivityDataSource implements ActivityDataSource {
     }
 
     public async findTimeSlotById(id: string | number, fecha?: string): Promise<TimeSlotEntity | null> {
-        const slot = await TimeSlotModel.findByPk(id);
+        if (!this.isValidId(id)) return null;
+        const slot = await TimeSlotModel.findByPk(Number(id));
         if (!slot) return null;
         const data = { ...slot.dataValues };
         if (fecha) {
@@ -97,8 +104,9 @@ export class PostgresActivityDataSource implements ActivityDataSource {
     }
 
     public async findTimeSlotsByActivityId(activityId: string | number, fecha?: string): Promise<TimeSlotEntity[]> {
+        if (!this.isValidId(activityId)) return [];
         const slots = await TimeSlotModel.findAll({
-            where: { activityId },
+            where: { activityId: Number(activityId) },
             order: [['startTime', 'ASC']]
         });
         return Promise.all(

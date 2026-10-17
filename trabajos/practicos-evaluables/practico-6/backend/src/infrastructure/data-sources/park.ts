@@ -4,7 +4,7 @@ import { ParkDataSource, ParkEntity } from '../../domain';
 export class PostgresParkDataSource implements ParkDataSource {
 
     constructor() {
-        ParkModel.sync();
+        ParkModel.sync({ alter: true });
     }
 
     public async findAll(): Promise<ParkEntity[]> {
@@ -13,7 +13,9 @@ export class PostgresParkDataSource implements ParkDataSource {
     }
 
     public async findById(id: string | number): Promise<ParkEntity | null> {
-        const park = await ParkModel.findByPk(id);
+        const num = Number(id);
+        if (!Number.isInteger(num) || num <= 0) return null;
+        const park = await ParkModel.findByPk(num);
         if (!park) return null;
         return ParkEntity.fromObject(park.dataValues);
     }
