@@ -209,7 +209,7 @@ export const Errors: Record<string, AppError> = {
     // Minimum Age & Maximum Capacity
     PARTICIPANT_AGE_BELOW_MINIMUM: {
         statusCode: 400,
-        message: 'La edad ingresada es menor a la edad mínima establecido para esta actividad',
+        message: 'La edad ingresada es menor a la edad mínima establecida para esta actividad',
     },
     ACTIVITY_MAX_CAPACITY_EXCEEDED: ((max?: number) => ({
         statusCode: 400,
