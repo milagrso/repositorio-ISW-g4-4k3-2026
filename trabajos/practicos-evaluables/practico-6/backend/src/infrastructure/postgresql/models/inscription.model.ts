@@ -56,11 +56,11 @@ InscriptionModel.init({
     },
     fecha: {
         type: DataTypes.STRING,
-        allowNull: true
+        allowNull: false
     },
     numeroInscripcion: {
         type: DataTypes.STRING,
-        allowNull: true
+        allowNull: false
     },
     createdAt: {
         type: DataTypes.DATE,
