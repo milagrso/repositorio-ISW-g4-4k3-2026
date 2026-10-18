@@ -20,14 +20,14 @@ export class InscriptionService {
         _userRepository?: UserRepository,
         private readonly emailHelper: EmailHelper = new EmailHelper(),
         private readonly qrHelper: QrHelper = new QrHelper(),
-    ) {}
+    ) { }
 
-    public async register(dto: RegisterInscriptionDto): Promise<RegisterInscriptionResponse> {
+    @Transactional()
+    public async registerInscription(dto: RegisterInscriptionDto): Promise<{ activity: any; numeroInscripcion: string }> {
         // 1. Validar calendario del parque si dto.fecha está presente (cerrado lunes, 25/12, 01/01)
         if (dto.fecha) {
             const [year, month, day] = dto.fecha.split('-').map(Number);
             const dateUtc = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
-            // getUTCDay: 0=Sunday, 1=Monday
             if (dateUtc.getUTCDay() === 1 || (month === 12 && day === 25) || (month === 1 && day === 1)) {
                 throw new ServiceError(Errors.PARK_CLOSED_ON_DATE);
             }
@@ -109,9 +109,37 @@ export class InscriptionService {
             }
         }
 
-        // 11. Generar número de inscripción y códigos QR
+        // 11. Reservar cupos y guardar la inscripción
+        const reserved = await this.inscriptionRepository.reserveSlots(timeSlot.id, dto.cantidad);
+        if (!reserved) {
+            throw new ServiceError(Errors.NO_AVAILABLE_SLOTS);
+        }
+
         const numeroInscripcion = `EHP-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
 
+        const inscription = InscriptionEntity.fromObject({
+            activityId: activity.id,
+            timeSlotId: timeSlot.id,
+            quantity: dto.cantidad,
+            participants: dto.participantes,
+            contactEmail: dto.emailContacto,
+            qrCode: '',
+            termsAccepted: dto.aceptaTerminos,
+            status: 'REGISTERED',
+            createdAt: new Date(),
+            fecha: dto.fecha,
+            numeroInscripcion,
+        });
+
+        await this.inscriptionRepository.save(inscription);
+
+        return { activity, numeroInscripcion };
+    }
+
+    public async register(dto: RegisterInscriptionDto): Promise<RegisterInscriptionResponse> {
+        const { activity, numeroInscripcion } = await this.registerInscription(dto);
+
+        // 12. Generar códigos QR por participante
         const participantesWithQr = await Promise.all(
             dto.participantes.map(async (p) => {
                 const qr = await this.qrHelper.generate({
@@ -129,9 +157,6 @@ export class InscriptionService {
         );
 
         const qrCode = participantesWithQr[0]?.qr ?? '';
-
-        // 12. Reservar cupos y guardar la inscripción de forma transaccional
-        await this.persistInscription(timeSlot.id, dto, activity.id, qrCode, numeroInscripcion);
 
         // 13. Enviar correo de confirmación (I/O externo fuera de la transacción DB)
         let emailFailed = false;
@@ -175,35 +200,5 @@ export class InscriptionService {
             horario: dto.horario,
             participantes: participantesWithQr,
         };
-    }
-
-    @Transactional()
-    private async persistInscription(
-        timeSlotId: string | number,
-        dto: RegisterInscriptionDto,
-        activityId: string | number,
-        qrCode: string,
-        numeroInscripcion: string
-    ): Promise<void> {
-        const reserved = await this.inscriptionRepository.reserveSlots(timeSlotId, dto.cantidad);
-        if (!reserved) {
-            throw new ServiceError(Errors.NO_AVAILABLE_SLOTS);
-        }
-
-        const inscription = InscriptionEntity.fromObject({
-            activityId,
-            timeSlotId,
-            quantity: dto.cantidad,
-            participants: dto.participantes,
-            contactEmail: dto.emailContacto,
-            qrCode,
-            termsAccepted: dto.aceptaTerminos,
-            status: 'REGISTERED',
-            createdAt: new Date(),
-            fecha: dto.fecha,
-            numeroInscripcion,
-        });
-
-        await this.inscriptionRepository.save(inscription);
     }
 }
