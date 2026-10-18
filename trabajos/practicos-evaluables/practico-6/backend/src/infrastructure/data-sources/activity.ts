@@ -4,10 +4,7 @@ import { ActivityDataSource, ActivityEntity, TimeSlotEntity } from '../../domain
 
 export class PostgresActivityDataSource implements ActivityDataSource {
 
-    constructor() {
-        ActivityModel.sync({ alter: true });
-        TimeSlotModel.sync({ alter: true });
-    }
+    constructor() {}
 
     private isValidId(id: string | number): boolean {
         const num = Number(id);

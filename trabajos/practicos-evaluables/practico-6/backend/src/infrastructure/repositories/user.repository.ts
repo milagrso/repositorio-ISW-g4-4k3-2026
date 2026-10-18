@@ -1,12 +1,12 @@
-import { UserEntity, UserRepository } from '../../domain';
+import { UserDataSource, UserEntity, UserRepository } from '../../domain';
 import { PostgresUserDataSource } from '../data-sources/user';
 
 export class UserRepository_I implements UserRepository {
 
-    private dataSource: PostgresUserDataSource;
+    private dataSource: UserDataSource;
 
-    constructor() {
-        this.dataSource = new PostgresUserDataSource();
+    constructor(dataSource?: UserDataSource) {
+        this.dataSource = dataSource ?? new PostgresUserDataSource();
     }
 
     public findAll(): Promise<UserEntity[]> {

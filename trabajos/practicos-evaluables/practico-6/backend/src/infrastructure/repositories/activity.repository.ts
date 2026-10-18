@@ -1,12 +1,12 @@
-import { ActivityEntity, ActivityRepository, TimeSlotEntity } from '../../domain';
+import { ActivityDataSource, ActivityEntity, ActivityRepository, TimeSlotEntity } from '../../domain';
 import { PostgresActivityDataSource } from '../data-sources/activity';
 
 export class ActivityRepository_I implements ActivityRepository {
 
-    private dataSource: PostgresActivityDataSource;
+    private dataSource: ActivityDataSource;
 
-    constructor() {
-        this.dataSource = new PostgresActivityDataSource();
+    constructor(dataSource?: ActivityDataSource) {
+        this.dataSource = dataSource ?? new PostgresActivityDataSource();
     }
 
     public findAll(): Promise<ActivityEntity[]> {

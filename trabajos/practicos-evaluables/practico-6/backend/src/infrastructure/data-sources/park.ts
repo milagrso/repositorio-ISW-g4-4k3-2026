@@ -3,9 +3,7 @@ import { ParkDataSource, ParkEntity } from '../../domain';
 
 export class PostgresParkDataSource implements ParkDataSource {
 
-    constructor() {
-        ParkModel.sync({ alter: true });
-    }
+    constructor() {}
 
     public async findAll(): Promise<ParkEntity[]> {
         const parks = await ParkModel.findAll();

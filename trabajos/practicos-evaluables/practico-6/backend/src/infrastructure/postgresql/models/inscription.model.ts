@@ -14,11 +14,19 @@ InscriptionModel.init({
     },
     activityId: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: false,
+        references: {
+            model: 'activities',
+            key: 'id'
+        }
     },
     timeSlotId: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: false,
+        references: {
+            model: 'time_slots',
+            key: 'id'
+        }
     },
     quantity: {
         type: DataTypes.INTEGER,
@@ -63,4 +71,12 @@ InscriptionModel.init({
     sequelize,
     tableName: 'inscriptions',
     modelName: 'Inscription',
+    indexes: [
+        {
+            fields: ['timeSlotId']
+        },
+        {
+            fields: ['fecha']
+        }
+    ]
 });

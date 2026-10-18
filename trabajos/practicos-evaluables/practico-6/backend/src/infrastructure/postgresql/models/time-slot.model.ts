@@ -14,7 +14,11 @@ TimeSlotModel.init({
     },
     activityId: {
         type: DataTypes.INTEGER,
-        allowNull: false
+        allowNull: false,
+        references: {
+            model: 'activities',
+            key: 'id'
+        }
     },
     startTime: {
         type: DataTypes.STRING,
@@ -35,11 +39,15 @@ TimeSlotModel.init({
     },
     fecha: {
         type: DataTypes.STRING,
-        allowNull: true,
-        defaultValue: null
+        allowNull: false
     }
 }, {
     sequelize,
     tableName: 'time_slots',
     modelName: 'TimeSlot',
+    indexes: [
+        {
+            fields: ['activityId', 'fecha']
+        }
+    ]
 });

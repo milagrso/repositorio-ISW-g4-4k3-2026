@@ -4,9 +4,7 @@ import { env } from '../../config';
 
 export class PostgresUserDataSource implements UserDataSource {
 
-    constructor() {
-        UserModel.sync();
-    }
+    constructor() {}
 
     public async findAll(): Promise<UserEntity[]> {
         const users = await UserModel.findAll();

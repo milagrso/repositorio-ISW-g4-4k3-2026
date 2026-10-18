@@ -5,10 +5,7 @@ import { InscriptionDataSource, InscriptionEntity } from '../../domain';
 
 export class PostgresInscriptionDataSource implements InscriptionDataSource {
 
-    constructor() {
-        InscriptionModel.sync({ alter: true });
-        TimeSlotModel.sync({ alter: true });
-    }
+    constructor() {}
 
     public async findAll(): Promise<InscriptionEntity[]> {
         const inscriptions = await InscriptionModel.findAll({ order: [['id', 'DESC']] });
@@ -36,7 +33,15 @@ export class PostgresInscriptionDataSource implements InscriptionDataSource {
             whereClause.fecha = fecha;
         }
 
-        const inscriptions = await InscriptionModel.findAll({ where: whereClause });
+        const inscriptions = await InscriptionModel.findAll({
+            where: whereClause,
+            include: horario ? [{
+                model: TimeSlotModel,
+                as: 'timeSlot',
+                where: { startTime: horario },
+                required: true,
+            }] : undefined,
+        });
 
         for (const insc of inscriptions) {
             const data = insc.dataValues;
@@ -44,13 +49,7 @@ export class PostgresInscriptionDataSource implements InscriptionDataSource {
             const hasDni = participants.some((p: any) => Number(p.dni) === Number(dni));
 
             if (hasDni) {
-                if (!horario) {
-                    return InscriptionEntity.fromObject(data);
-                }
-                const slot = await TimeSlotModel.findByPk(data.timeSlotId);
-                if (slot && slot.dataValues.startTime === horario) {
-                    return InscriptionEntity.fromObject(data);
-                }
+                return InscriptionEntity.fromObject(data);
             }
         }
 

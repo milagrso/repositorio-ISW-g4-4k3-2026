@@ -12,6 +12,11 @@ ParkModel.init({
         autoIncrement: true,
         primaryKey: true
     },
+    name: {
+        type: DataTypes.STRING,
+        allowNull: false,
+        defaultValue: 'EcoHarmony Park'
+    },
     status: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -20,12 +25,12 @@ ParkModel.init({
     openTime: {
         type: DataTypes.STRING,
         allowNull: false,
-        defaultValue: '08:00'
+        defaultValue: '08:30'
     },
     closeTime: {
         type: DataTypes.STRING,
         allowNull: false,
-        defaultValue: '18:00'
+        defaultValue: '19:00'
     }
 }, {
     sequelize,

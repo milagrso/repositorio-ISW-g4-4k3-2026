@@ -1,12 +1,12 @@
-import { ParkEntity, ParkRepository } from '../../domain';
+import { ParkDataSource, ParkEntity, ParkRepository } from '../../domain';
 import { PostgresParkDataSource } from '../data-sources/park';
 
 export class ParkRepository_I implements ParkRepository {
 
-    private dataSource: PostgresParkDataSource;
+    private dataSource: ParkDataSource;
 
-    constructor() {
-        this.dataSource = new PostgresParkDataSource();
+    constructor(dataSource?: ParkDataSource) {
+        this.dataSource = dataSource ?? new PostgresParkDataSource();
     }
 
     public findAll(): Promise<ParkEntity[]> {
