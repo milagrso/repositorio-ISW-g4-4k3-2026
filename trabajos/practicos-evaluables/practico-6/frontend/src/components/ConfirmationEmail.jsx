@@ -78,7 +78,7 @@ export default function ConfirmationEmail({ registration, onReset }) {
           <div className="divider my-0" />
 
           <div className="space-y-3">
-            <h1 className="font-display text-3xl font-semibold">Tu lugar está reservado</h1>
+            <h1 className="font-display text-3xl font-black">Tu lugar está reservado</h1>
             <p>
               {parkName} confirmó la inscripción a{' '}
               <strong>{registration.activityName}</strong> el {registration.dateLabel} a las{' '}

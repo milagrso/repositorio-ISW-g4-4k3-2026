@@ -42,7 +42,7 @@ export default function Home() {
         <div className="relative flex h-full flex-col justify-end gap-3 p-5 text-white">
           <span className="text-xs font-medium tracking-[0.2em] uppercase">Parque de diversiones</span>
           <div>
-            <h1 className="font-display text-4xl leading-none font-semibold">
+            <h1 className="font-display text-4xl leading-none font-black">
               {park?.name ?? 'EcoHarmony Park'}
             </h1>
             <p className="mt-2 text-sm text-white/85">Naturaleza, juego y aire libre.</p>
@@ -91,7 +91,7 @@ export default function Home() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent" />
                 <div className="absolute right-3 bottom-3 left-3 text-white">
                   <div className="mb-1 flex items-center justify-between gap-2">
-                    <h2 className="font-display text-2xl font-semibold">{activity.name}</h2>
+                    <h2 className="font-display text-2xl font-black">{activity.name}</h2>
                     <div className="flex shrink-0 gap-1">
                       {activity.minAge ? (
                         <span className="badge badge-sm border-white/30 bg-white/15 text-white">

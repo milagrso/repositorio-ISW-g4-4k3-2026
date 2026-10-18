@@ -23,20 +23,20 @@ function Monigote({ delay, wave }) {
 
   return (
     <svg viewBox="0 0 72 110" className="h-full w-full overflow-visible" aria-hidden="true">
-      <circle cx="36" cy="14" r="11" fill="#fff" stroke="#111" strokeWidth="2.4" />
-      <line x1="36" y1="25" x2="36" y2="62" stroke="#111" strokeWidth="2.4" strokeLinecap="round" />
-      <line x1="36" y1="38" x2="16" y2="54" stroke="#111" strokeWidth="2.4" strokeLinecap="round" />
+      <circle cx="36" cy="14" r="11" fill="#f2e8cf" stroke="#386641" strokeWidth="2.4" />
+      <line x1="36" y1="25" x2="36" y2="62" stroke="#386641" strokeWidth="2.4" strokeLinecap="round" />
+      <line x1="36" y1="38" x2="16" y2="54" stroke="#386641" strokeWidth="2.4" strokeLinecap="round" />
       <motion.path
         d={ARM_REST}
         fill="none"
-        stroke="#111"
+        stroke="#386641"
         strokeWidth="2.4"
         strokeLinecap="round"
         animate={start.wave ? { d: WAVE } : undefined}
         transition={{ delay: start.delay, duration: 1.5, ease: 'easeInOut' }}
       />
-      <line x1="36" y1="62" x2="20" y2="96" stroke="#111" strokeWidth="2.4" strokeLinecap="round" />
-      <line x1="36" y1="62" x2="52" y2="96" stroke="#111" strokeWidth="2.4" strokeLinecap="round" />
+      <line x1="36" y1="62" x2="20" y2="96" stroke="#386641" strokeWidth="2.4" strokeLinecap="round" />
+      <line x1="36" y1="62" x2="52" y2="96" stroke="#386641" strokeWidth="2.4" strokeLinecap="round" />
     </svg>
   )
 }
@@ -165,7 +165,7 @@ export default function PeopleSky({ ids }) {
   const places = box.width > 0 ? arrange(ids, box.width, box.height) : []
 
   return (
-    <div className="relative h-44 overflow-hidden rounded-[1.75rem] bg-white">
+    <div className="relative h-44 overflow-hidden rounded-[1.75rem] bg-base-100">
       <div ref={stage} className="absolute inset-x-2 top-2 bottom-1">
         <AnimatePresence>
           {places.map((place) => {

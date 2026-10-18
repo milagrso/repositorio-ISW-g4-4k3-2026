@@ -409,7 +409,7 @@ export default function Inscripcion() {
         <p className="text-primary text-xs font-semibold tracking-[0.16em] uppercase">
           Paso {step + 1} de {STEPS.length}
         </p>
-        <h1 className="font-display text-3xl font-semibold">{copy.title}</h1>
+        <h1 className="font-display text-3xl font-black">{copy.title}</h1>
         <p className="text-base-content/70">{copy.text}</p>
       </header>
 

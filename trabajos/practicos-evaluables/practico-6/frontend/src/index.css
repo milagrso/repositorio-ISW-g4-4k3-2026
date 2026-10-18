@@ -1,71 +1,44 @@
-@import url("https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,560;9..144,700&family=Outfit:wght@400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Lato:wght@400;700;900&display=swap");
 @import "tailwindcss";
 @plugin "daisyui" {
-  themes: light --default, dark;
+  themes: light --default;
 }
 
+/* Paleta del parque (FAQ 3): coolors.co/palette/386641-6a994e-a7c957-f2e8cf-bc4749.
+   Fondos y textos usan esos cinco colores o mezclas entre ellos. */
 @plugin "daisyui/theme" {
   name: "light";
   default: true;
   prefersdark: false;
   color-scheme: light;
-  --color-base-100: oklch(98.2% 0.012 105);
-  --color-base-200: oklch(95% 0.025 135);
-  --color-base-300: oklch(89% 0.04 145);
-  --color-base-content: oklch(27% 0.04 155);
-  --color-primary: oklch(40% 0.09 155);
-  --color-primary-content: oklch(97% 0.015 110);
-  --color-secondary: oklch(58% 0.11 65);
-  --color-secondary-content: oklch(98% 0.01 80);
-  --color-accent: oklch(62% 0.1 145);
-  --color-accent-content: oklch(22% 0.04 155);
-  --color-neutral: oklch(27% 0.04 155);
-  --color-neutral-content: oklch(96% 0.015 120);
-  --color-info: oklch(62% 0.08 210);
-  --color-info-content: oklch(98% 0.01 210);
-  --color-success: oklch(52% 0.12 155);
-  --color-success-content: oklch(97% 0.02 140);
-  --color-warning: oklch(75% 0.13 75);
-  --color-warning-content: oklch(28% 0.05 70);
-  --color-error: oklch(55% 0.16 30);
-  --color-error-content: oklch(98% 0.01 30);
-  --radius-selector: 1.25rem;
-  --radius-field: 1.4rem;
-  --radius-box: 1.75rem;
-}
-
-@plugin "daisyui/theme" {
-  name: "dark";
-  prefersdark: false;
-  color-scheme: dark;
-  --color-base-100: oklch(24% 0.03 160);
-  --color-base-200: oklch(20% 0.025 160);
-  --color-base-300: oklch(30% 0.03 155);
-  --color-base-content: oklch(94% 0.02 130);
-  --color-primary: oklch(74% 0.11 150);
-  --color-primary-content: oklch(20% 0.04 155);
-  --color-secondary: oklch(72% 0.1 70);
-  --color-secondary-content: oklch(22% 0.04 70);
-  --color-accent: oklch(70% 0.09 155);
-  --color-accent-content: oklch(18% 0.03 155);
-  --color-neutral: oklch(18% 0.03 160);
-  --color-neutral-content: oklch(94% 0.02 130);
-  --color-info: oklch(70% 0.08 210);
-  --color-info-content: oklch(18% 0.03 210);
-  --color-success: oklch(70% 0.12 155);
-  --color-success-content: oklch(18% 0.04 155);
-  --color-warning: oklch(80% 0.12 80);
-  --color-warning-content: oklch(24% 0.05 70);
-  --color-error: oklch(70% 0.14 30);
-  --color-error-content: oklch(18% 0.04 30);
+  --color-base-100: color-mix(in oklch, #f2e8cf 40%, white);
+  --color-base-200: #f2e8cf;
+  --color-base-300: color-mix(in oklch, #f2e8cf 82%, #386641);
+  --color-base-content: color-mix(in oklch, #386641 55%, black);
+  --color-primary: #386641;
+  --color-primary-content: #f2e8cf;
+  --color-secondary: #6a994e;
+  --color-secondary-content: color-mix(in oklch, #386641 45%, black);
+  --color-accent: #a7c957;
+  --color-accent-content: color-mix(in oklch, #386641 55%, black);
+  --color-neutral: color-mix(in oklch, #386641 55%, black);
+  --color-neutral-content: #f2e8cf;
+  --color-info: #6a994e;
+  --color-info-content: #f2e8cf;
+  --color-success: #386641;
+  --color-success-content: #f2e8cf;
+  --color-warning: color-mix(in oklch, #bc4749 22%, #f2e8cf);
+  --color-warning-content: color-mix(in oklch, #bc4749 70%, black);
+  --color-error: #bc4749;
+  --color-error-content: #f2e8cf;
   --radius-selector: 1.25rem;
   --radius-field: 1.4rem;
   --radius-box: 1.75rem;
 }
 
 @theme {
-  --font-sans: "Outfit", ui-sans-serif, system-ui, sans-serif;
-  --font-display: "Fraunces", Georgia, serif;
+  --font-sans: "Lato", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Lato", ui-sans-serif, system-ui, sans-serif;
 }
 
 html {
@@ -99,7 +72,7 @@ body {
 
 .park-calendar .rdp-caption_label {
   font-family: var(--font-display);
-  font-weight: 600;
+  font-weight: 900;
   text-transform: capitalize;
 }
 
