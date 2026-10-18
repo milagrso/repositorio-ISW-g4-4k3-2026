@@ -10,6 +10,7 @@ import { RegisterInscriptionDto } from '../../dto/inscription/register-inscripti
 import { EmailStatus, RegisterInscriptionResponse } from '../../dto/inscription/register-inscription.res';
 import { InscriptionEntity } from '../../../domain/entities/inscription.entity';
 import { Transactional } from '../../../infrastructure/decorators/transactional.decorator';
+import { TimeHelper } from '../../helpers/time.helper';
 
 export class InscriptionService {
     constructor(
@@ -51,34 +52,22 @@ export class InscriptionService {
         }
 
         // 5. Validar ventana temporal de reserva (dentro de las 24h previas y al menos 15m antes)
-        // Se activa en tests cuando jest.useFakeTimers() está en uso, o en entorno productivo/no-test
         if (dto.fecha && dto.horario) {
-            const isTestEnv = process.env.NODE_ENV === 'test';
-            const isFakeTimerActive = Boolean((setTimeout as any)?.clock);
-            if (!isTestEnv || isFakeTimerActive) {
-                const formattedHorario = dto.horario.length === 5 ? `${dto.horario}:00` : dto.horario;
-                let slotDateTime = new Date(`${dto.fecha}T${formattedHorario}-03:00`).getTime();
-                if (isTestEnv && isFakeTimerActive) {
-                    slotDateTime -= 3 * 60 * 60 * 1000;
-                }
-                const now = new Date().getTime();
-                const diffMs = slotDateTime - now;
+            const slotDateTime = TimeHelper.parseArgentinaDateTime(dto.fecha, dto.horario);
+            const now = new Date().getTime();
+            const diffMs = slotDateTime - now;
 
-                if (diffMs > 24 * 60 * 60 * 1000) {
-                    throw new ServiceError(Errors.BOOKING_TOO_EARLY);
-                }
-                if (diffMs < 15 * 60 * 1000) {
-                    throw new ServiceError(Errors.BOOKING_TOO_LATE);
-                }
+            if (diffMs > 24 * 60 * 60 * 1000) {
+                throw new ServiceError(Errors.BOOKING_TOO_EARLY);
+            }
+            if (diffMs < 15 * 60 * 1000) {
+                throw new ServiceError(Errors.BOOKING_TOO_LATE);
             }
         }
 
         // 6. Validar capacidad máxima total de la actividad
         if (activity.maxCapacityActivity !== undefined && activity.maxCapacityActivity !== null && dto.cantidad > activity.maxCapacityActivity) {
-            const errorObj = typeof Errors.ACTIVITY_MAX_CAPACITY_EXCEEDED === 'function'
-                ? (Errors.ACTIVITY_MAX_CAPACITY_EXCEEDED as any)(activity.maxCapacityActivity)
-                : { statusCode: 400, message: `La cantidad de inscriptos supera la capacidad máxima permitida para esta actividad (máximo ${activity.maxCapacityActivity})` };
-            throw new ServiceError(errorObj);
+            throw new ServiceError((Errors.ACTIVITY_MAX_CAPACITY_EXCEEDED as any)(activity.maxCapacityActivity));
         }
 
         // 7. Validar edad mínima por actividad
@@ -109,24 +98,9 @@ export class InscriptionService {
         }
 
         // 10. Validar solapamiento de horarios por participante (DNI)
-        if (this.inscriptionRepository.hasActiveInscriptionForParticipant || this.inscriptionRepository.findActiveByParticipantDniAndSchedule) {
-            let hasOverlap = false;
-            for (const p of dto.participantes) {
-                if (this.inscriptionRepository.hasActiveInscriptionForParticipant) {
-                    const overlap = await this.inscriptionRepository.hasActiveInscriptionForParticipant(p.dni, dto.horario, dto.fecha);
-                    if (overlap) {
-                        hasOverlap = true;
-                        break;
-                    }
-                } else if (this.inscriptionRepository.findActiveByParticipantDniAndSchedule) {
-                    const active = await this.inscriptionRepository.findActiveByParticipantDniAndSchedule(p.dni, dto.horario, dto.fecha);
-                    if (active) {
-                        hasOverlap = true;
-                        break;
-                    }
-                }
-            }
-            if (hasOverlap) {
+        for (const p of dto.participantes) {
+            const overlap = await this.inscriptionRepository.hasActiveInscriptionForParticipant!(p.dni, dto.horario, dto.fecha);
+            if (overlap) {
                 if (dto.participantes.length > 1) {
                     throw new ServiceError(Errors.GROUP_PARTICIPANT_SCHEDULE_OVERLAP);
                 } else {
@@ -138,39 +112,23 @@ export class InscriptionService {
         // 11. Generar número de inscripción y códigos QR
         const numeroInscripcion = `EHP-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
 
-        let qrCode = 'qr-data-string';
-        try {
-            qrCode = await this.qrHelper.generate({
-                numeroInscripcion,
-                actividad: activity.name,
-                horario: dto.horario,
-                cantidad: dto.cantidad,
-                participantes: dto.participantes,
-            });
-        } catch (e) {
-            qrCode = 'qr-data-string';
-        }
-
         const participantesWithQr = await Promise.all(
             dto.participantes.map(async (p) => {
-                let pQr = qrCode;
-                try {
-                    pQr = await this.qrHelper.generate({
-                        numeroInscripcion,
-                        actividad: activity.name,
-                        horario: dto.horario,
-                        fecha: dto.fecha,
-                        participante: p,
-                    });
-                } catch (e) {
-                    pQr = qrCode;
-                }
+                const qr = await this.qrHelper.generate({
+                    numeroInscripcion,
+                    actividad: activity.name,
+                    horario: dto.horario,
+                    fecha: dto.fecha,
+                    participante: p,
+                });
                 return {
                     ...p,
-                    qr: pQr,
+                    qr,
                 };
             })
         );
+
+        const qrCode = participantesWithQr[0]?.qr ?? '';
 
         // 12. Reservar cupos y guardar la inscripción de forma transaccional
         await this.persistInscription(timeSlot.id, dto, activity.id, qrCode, numeroInscripcion);
