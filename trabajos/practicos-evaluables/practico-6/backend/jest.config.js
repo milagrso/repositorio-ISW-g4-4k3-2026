@@ -40,6 +40,8 @@ module.exports = {
         },
     },
     testEnvironment: 'node',
+    clearMocks: true,
+    restoreMocks: true,
     moduleNameMapper: {
         '^src/(.*)$': '<rootDir>/$1',
         '^test/(.*)$': '<rootDir>/../test/$1',
