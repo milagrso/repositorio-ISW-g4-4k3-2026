@@ -5,7 +5,8 @@ export class TimeSlotEntity {
         public startTime: string,
         public endTime: string,
         public maxCapacity: number,
-        public occupiedSlots: number = 0
+        public occupiedSlots: number = 0,
+        public fecha?: string
     ) {}
 
     getAvailableSlots(): number {
@@ -21,7 +22,7 @@ export class TimeSlotEntity {
     }
 
     static fromObject(object: { [key: string]: any }): TimeSlotEntity {
-        const { _id, id, activityId, startTime, endTime, maxCapacity, occupiedSlots = 0 } = object;
+        const { _id, id, activityId, startTime, endTime, maxCapacity, occupiedSlots = 0, fecha } = object;
 
         return new TimeSlotEntity(
             _id || id,
@@ -29,7 +30,8 @@ export class TimeSlotEntity {
             startTime,
             endTime,
             maxCapacity,
-            occupiedSlots
+            occupiedSlots,
+            fecha
         );
     }
 }
