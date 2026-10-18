@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'wouter'
 import { AnimatePresence, motion } from 'motion/react'
-import { Leaf } from 'lucide-react'
 import { usePark } from '../api/index.js'
 import { DockContext } from './dock-context.js'
 
@@ -17,7 +16,7 @@ export default function Layout({ children }) {
         <header className="sticky top-0 z-20 px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-3">
           <div className="border-base-300/80 bg-base-100/80 flex items-center rounded-full border px-4 py-2 shadow-[0_10px_30px_-18px_oklch(25%_0.04_155/0.7)] backdrop-blur-md">
             <Link href="/" className="font-display flex min-w-0 items-center gap-2 text-lg font-black tracking-tight">
-              <Leaf className="text-primary size-5 shrink-0" />
+              <img src="/logo/icono.svg" alt="" className="size-8 shrink-0" />
               <span className="truncate">{park?.name ?? 'EcoHarmony Park'}</span>
             </Link>
           </div>
