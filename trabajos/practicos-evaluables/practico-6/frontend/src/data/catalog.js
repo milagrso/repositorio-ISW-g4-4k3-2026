@@ -2,8 +2,14 @@ function slot(time, capacity, status = 'open') {
   return { time, capacity, status }
 }
 
-function onDays(days, slots) {
-  return Object.fromEntries(days.map((day) => [day, slots]))
+// Un turno por hora de 09:00 a 17:00 (a las 18:00 no hay turno), todos los días que abre
+// el parque: de martes a domingo. El cupo es el mismo en cada turno.
+const PARK_TIMES = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00']
+const OPEN_WEEKDAYS = [0, 2, 3, 4, 5, 6]
+
+function everyOpenDay(capacity) {
+  const slots = PARK_TIMES.map((time) => slot(time, capacity))
+  return Object.fromEntries(OPEN_WEEKDAYS.map((day) => [day, slots]))
 }
 
 export const parkRecord = {
@@ -38,12 +44,8 @@ export const activityRecords = [
     requiresSize: true,
     terms:
       'Declaro que puedo realizar la tirolesa, que voy a usar el arnés y el casco, y que voy a seguir las indicaciones del guía. EcoHarmony Park puede suspender la actividad por clima o seguridad.',
-    schedules: {
-      ...onDays([2, 3, 4], [slot('10:00', 12), slot('14:00', 8), slot('16:00', 6)]),
-      5: [slot('10:00', 12), slot('12:00', 4), slot('14:00', 8), slot('16:00', 6), slot('19:00', 10)],
-      6: [slot('10:00', 12), slot('12:00', 0), slot('14:00', 8), slot('16:00', 6), slot('19:00', 10, 'closed')],
-      0: [slot('10:00', 8), slot('14:00', 4), slot('16:00', 6)],
-    },
+    minAge: 8,
+    schedules: everyOpenDay(10),
   },
   {
     id: 'safari',
@@ -53,11 +55,8 @@ export const activityRecords = [
     requiresSize: false,
     terms:
       'Me comprometo a permanecer en el vehículo, a no alimentar a los animales y a respetar las indicaciones del guía durante todo el safari.',
-    schedules: {
-      ...onDays([2, 3, 4, 5], [slot('09:00', 20), slot('11:00', 15), slot('15:00', 10)]),
-      6: [slot('09:00', 20), slot('11:00', 15), slot('15:00', 0), slot('18:30', 10, 'unavailable')],
-      0: [slot('09:00', 12), slot('11:00', 10)],
-    },
+    minAge: 0,
+    schedules: everyOpenDay(8),
   },
   {
     id: 'palestra',
@@ -67,11 +66,8 @@ export const activityRecords = [
     requiresSize: true,
     terms:
       'Acepto usar arnés y el calzado indicado, informar si es mi primera vez y escalar solo las vías que habilite el instructor.',
-    schedules: {
-      ...onDays([2, 3, 4, 5], [slot('10:00', 8), slot('17:00', 6)]),
-      6: [slot('10:00', 8), slot('13:00', 0), slot('17:00', 6), slot('19:30', 4, 'closed')],
-      0: [slot('10:00', 4), slot('17:00', 6)],
-    },
+    minAge: 12,
+    schedules: everyOpenDay(12),
   },
   {
     id: 'jardineria',
@@ -81,11 +77,8 @@ export const activityRecords = [
     requiresSize: false,
     terms:
       'Acepto usar las herramientas solo con supervisión, cuidar las especies y seguir las indicaciones de quien guía el taller.',
-    schedules: {
-      ...onDays([2, 3, 4, 5], [slot('09:00', 16), slot('11:30', 10)]),
-      6: [slot('09:00', 16), slot('11:30', 10), slot('16:00', 8, 'unavailable')],
-      0: [slot('09:00', 8), slot('11:30', 6)],
-    },
+    minAge: 0,
+    schedules: everyOpenDay(12),
   },
 ]
 
@@ -110,6 +103,7 @@ export function toActivity(activity) {
     image: activity.image,
     summary: activity.summary,
     requiresSize: activity.requiresSize,
+    minAge: activity.minAge,
     terms: activity.terms,
     times: offeredTimes(activity),
   }
