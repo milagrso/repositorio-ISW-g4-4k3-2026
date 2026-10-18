@@ -1,3 +1,4 @@
+import { addDays, bookingMessages, bookingState, parkDateTime } from './clock.js'
 import { isClosedHoliday } from './holidays.js'
 
 export const NAME_MAX = 60
@@ -22,11 +23,9 @@ export function emptyVisitor() {
   return { id: visitorSeq, nombre: '', dni: '', edad: '', talle: '' }
 }
 
-export function todayISO() {
-  const now = new Date()
-  const month = String(now.getMonth() + 1).padStart(2, '0')
-  const day = String(now.getDate()).padStart(2, '0')
-  return `${now.getFullYear()}-${month}-${day}`
+// Hoy según la hora del parque. `now` sale de useParkClock, nunca del reloj del dispositivo.
+export function todayISO(now) {
+  return parkDateTime(now).date
 }
 
 export function parseISODate(dateStr) {
@@ -40,8 +39,8 @@ export function toISODate(date) {
   return `${date.getFullYear()}-${month}-${day}`
 }
 
-export function todayDate() {
-  return parseISODate(todayISO())
+export function todayDate(now) {
+  return parseISODate(todayISO(now))
 }
 
 export function isClosedWeekday(dateStr, closedWeekdays = [1]) {
@@ -49,16 +48,31 @@ export function isClosedWeekday(dateStr, closedWeekdays = [1]) {
   return closedWeekdays.includes(parseISODate(dateStr).getDay())
 }
 
-export function slotLabel(slot) {
+export function slotLabel(slot, date, now) {
   if (slot.status === 'closed') return 'Parque cerrado'
   if (slot.status === 'unavailable') return 'No disponible'
+  const booking = now != null ? bookingState(date, slot.time, now) : null
+  if (booking === 'late') return 'Inscripción cerrada'
+  if (booking === 'early') return 'Abre 24 h antes'
   if (slot.capacity === 0) return 'Sin cupos'
   return `${slot.capacity} cupos`
 }
 
-export function isPastDate(dateStr) {
-  if (!dateStr) return false
-  return dateStr < todayISO()
+export function isPastDate(dateStr, now) {
+  if (!dateStr || now == null) return false
+  return dateStr < todayISO(now)
+}
+
+// Días con al menos un turno reservable ahora: como mucho hoy y mañana, por la regla de 24 h.
+export function reservableDates(now, times, closedWeekdays = [1]) {
+  const dates = new Set()
+  if (now == null) return dates
+  const today = todayISO(now)
+  for (const date of [today, addDays(today, 1)]) {
+    if (isClosedWeekday(date, closedWeekdays) || isClosedHoliday(date)) continue
+    if ((times ?? []).some((time) => !bookingState(date, time, now))) dates.add(date)
+  }
+  return dates
 }
 
 export function formatDayMonth(dateStr) {
@@ -83,13 +97,13 @@ export function slotCapacity(slots, time) {
   return slot ? slot.capacity : null
 }
 
-export function slotProblem(slots, date, time, people, closedWeekdays = [1]) {
+export function slotProblem(slots, date, time, people, closedWeekdays = [1], now = null) {
   if (!date || !time) return null
 
   const slot = (slots ?? []).find((item) => item.time === time)
   if (!slot) return 'Ese horario no está disponible para la fecha elegida.'
 
-  if (isPastDate(date)) return 'No podés elegir una fecha pasada.'
+  if (isPastDate(date, now)) return 'No podés elegir una fecha pasada.'
 
   if (isClosedWeekday(date, closedWeekdays) || isClosedHoliday(date)) {
     return 'El parque está cerrado en la fecha seleccionada.'
@@ -102,6 +116,9 @@ export function slotProblem(slots, date, time, people, closedWeekdays = [1]) {
   if (slot.status === 'unavailable') {
     return 'La actividad no está disponible en el horario seleccionado.'
   }
+
+  const booking = now != null ? bookingState(date, time, now) : null
+  if (booking) return bookingMessages[booking]
 
   const count = Number(people)
   if (!Number.isInteger(count) || count < 1) return null
@@ -119,16 +136,23 @@ export function slotProblem(slots, date, time, people, closedWeekdays = [1]) {
 export function validateInscription(form, activity, options = {}) {
   const errors = {}
   const closedWeekdays = options.closedWeekdays ?? [1]
+  const now = options.now ?? null
 
   if (!activity) errors.activity = 'Seleccioná una actividad.'
 
   let dateReady = false
-  if (!form.date) {
+  if (now == null) {
+    errors.date = options.clockError
+      ? 'No pudimos consultar la hora del parque. Reintentá.'
+      : 'Estamos consultando la hora del parque.'
+  } else if (!form.date) {
     errors.date = 'Seleccioná una fecha.'
-  } else if (isPastDate(form.date)) {
+  } else if (isPastDate(form.date, now)) {
     errors.date = 'No podés elegir una fecha pasada.'
   } else if (isClosedWeekday(form.date, closedWeekdays) || isClosedHoliday(form.date)) {
     errors.date = 'El parque está cerrado en la fecha seleccionada.'
+  } else if (form.date > addDays(todayISO(now), 1)) {
+    errors.date = bookingMessages.early
   } else {
     dateReady = true
   }
@@ -159,6 +183,7 @@ export function validateInscription(form, activity, options = {}) {
       form.time,
       form.people,
       closedWeekdays,
+      now,
     )
     if (scheduleError) errors.schedule = scheduleError
   }
@@ -230,6 +255,7 @@ export function validateStep(step, form, activity, options) {
         form.time,
         1,
         options.closedWeekdays,
+        options.now,
       )
       if (schedule) errors.schedule = schedule
     }

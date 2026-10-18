@@ -16,11 +16,13 @@ import {
   sanitizeName,
   slotCapacity,
   slotLabel,
+  reservableDates,
   slotProblem,
   todayDate,
   validateInscription,
   validateStep,
 } from '../lib/inscription.js'
+import { useParkClock } from '../lib/clock.js'
 import ConfirmationEmail from '../components/ConfirmationEmail.jsx'
 import ParkCalendar from '../components/ParkCalendar.jsx'
 import PeopleSky from '../components/PeopleSky.jsx'
@@ -129,7 +131,8 @@ export default function Inscripcion() {
   const [direction, setDirection] = useState(1)
 
   const reduce = useReducedMotion()
-  const [calendarMonth, setCalendarMonth] = useState(() => todayDate())
+  const clock = useParkClock()
+  const [calendarMonth, setCalendarMonth] = useState(null)
   const { slots, status: slotsStatus, retry: retrySlots } = useSlots(activity?.id, form.date)
   // El tope de personas es el cupo del horario elegido. Sin horario todavía, no hay tope.
   const peopleLimit = slotCapacity(slots, form.time)
@@ -140,12 +143,18 @@ export default function Inscripcion() {
       slotsReady: !form.date || slotsStatus === 'ready',
       slotsError: slotsStatus === 'error',
       closedWeekdays,
+      now: clock.now,
+      clockError: clock.status === 'error',
     }),
-    [closedWeekdays, form.date, slots, slotsStatus],
+    [clock.now, clock.status, closedWeekdays, form.date, slots, slotsStatus],
+  )
+  const reservable = useMemo(
+    () => reservableDates(clock.now, activity?.times, closedWeekdays),
+    [activity, clock.now, closedWeekdays],
   )
   const scheduleMessage =
     form.date && form.time && slotsStatus === 'ready'
-      ? slotProblem(slots, form.date, form.time, form.people, closedWeekdays)
+      ? slotProblem(slots, form.date, form.time, form.people, closedWeekdays, clock.now)
       : null
   const messages = useMemo(
     () => errorList(errors).filter((message) => message !== scheduleMessage),
@@ -430,9 +439,12 @@ export default function Inscripcion() {
                   <span className="label-text">Fecha</span>
                   <ParkCalendar
                     value={form.date}
-                    month={calendarMonth}
+                    month={calendarMonth ?? (clock.now != null ? todayDate(clock.now) : null)}
                     onMonthChange={setCalendarMonth}
-                    closedWeekdays={closedWeekdays}
+                    now={clock.now}
+                    status={clock.status}
+                    onRetry={clock.retry}
+                    reservable={reservable}
                     invalid={Boolean(errors.date)}
                     onChange={(date) => {
                       setErrors({})
@@ -471,7 +483,7 @@ export default function Inscripcion() {
                           }}
                         >
                           {slot.time}
-                          <span className="badge badge-sm">{slotLabel(slot)}</span>
+                          <span className="badge badge-sm">{slotLabel(slot, form.date, clock.now)}</span>
                         </button>
                       ))
                     : null}
