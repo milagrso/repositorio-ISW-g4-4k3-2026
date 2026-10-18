@@ -15,7 +15,11 @@ export class AppRouter {
         // Core API Modules
         router.use('/api/inscriptions', InscriptionRoutes.routes);
         router.use('/api/catalog', CatalogRoutes.routes);
-        router.use('/api', CatalogRoutes.routes);
+
+        // Direct compatibility route for server time
+        router.get('/api/time', (req, res, next) => {
+            CatalogRoutes.routes(req, res, next);
+        });
 
         return router;
     }

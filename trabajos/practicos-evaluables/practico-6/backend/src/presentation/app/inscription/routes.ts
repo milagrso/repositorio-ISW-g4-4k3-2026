@@ -25,7 +25,6 @@ export class InscriptionRoutes {
 
         const controller = new InscriptionController(service);
 
-        router.post('/register', controller.register);
         router.post('/', controller.register);
 
         return router;

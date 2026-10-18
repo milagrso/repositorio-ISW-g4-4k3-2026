@@ -9,46 +9,22 @@ export class ActivityResponse {
     id!: number;
 
     @ApiProperty({ type: 'string', example: 'Tirolesa', description: 'Nombre de la actividad' })
-    nombre!: string;
+    name!: string;
 
     @ApiProperty({ type: 'boolean', example: true, description: 'Indica si la actividad está habilitada' })
-    habilitada!: boolean;
+    enabled!: boolean;
 
-    @ApiProperty({ type: 'boolean', example: true, description: 'Indica si requiere talle de vestimenta/calzado' })
-    requiereTalle!: boolean;
+    @ApiProperty({ type: 'object', description: 'Requerimiento de vestimenta/calzado y talles válidos', required: false })
+    cloth?: Record<string, any> | null;
 
-    @ApiProperty({ type: 'integer', example: 8, description: 'Edad mínima requerida' })
-    edadMinima!: number;
+    @ApiProperty({ type: 'integer', example: 8, description: 'Edad mínima requerida', required: false })
+    minAge?: number;
 
-    @ApiProperty({ type: 'integer', example: 10, description: 'Capacidad máxima de personas en la actividad' })
-    cupoMaximo!: number;
+    @ApiProperty({ type: 'integer', example: 10, description: 'Capacidad máxima de personas en la actividad', required: false })
+    maxCapacityActivity?: number;
 
-    @ApiProperty({ type: 'string', example: 'Declaro que puedo realizar la actividad de Tirolesa...', description: 'Texto de términos y condiciones de la actividad' })
-    terminos!: string;
-}
-
-@ApiSchema({
-    name: 'TimeSlotAvailabilityResponse',
-    description: 'Disponibilidad calculada de un turno para una fecha específica',
-})
-export class TimeSlotAvailabilityResponse {
-    @ApiProperty({ type: 'integer', example: 10, description: 'ID del turno' })
-    id!: number;
-
-    @ApiProperty({ type: 'string', example: '10:00', description: 'Hora de inicio del turno' })
-    hora!: string;
-
-    @ApiProperty({ type: 'integer', example: 10, description: 'Cupo máximo total del turno' })
-    cupoMaximo!: number;
-
-    @ApiProperty({ type: 'integer', example: 8, description: 'Cupos disponibles restantes' })
-    cuposDisponibles!: number;
-
-    @ApiProperty({ type: 'boolean', example: true, description: 'Indica si el turno es reservable en la fecha indicada' })
-    reservable!: boolean;
-
-    @ApiProperty({ type: 'string', example: 'Sin cupos', description: 'Motivo en caso de no ser reservable', required: false })
-    motivo?: string;
+    @ApiProperty({ type: 'string', example: 'Declaro que puedo realizar la actividad de Tirolesa...', description: 'Texto de términos y condiciones de la actividad', required: false })
+    termsAndConditions?: string;
 }
 
 @ApiSchema({
@@ -61,6 +37,9 @@ export class TimeSlotResponse {
 
     @ApiProperty({ type: 'integer', example: 1, description: 'ID de la actividad asociada' })
     activityId!: number;
+
+    @ApiProperty({ type: 'string', example: '2026-10-18', description: 'Fecha del turno (YYYY-MM-DD)' })
+    fecha!: string;
 
     @ApiProperty({ type: 'string', example: '09:00', description: 'Hora de inicio (HH:MM)' })
     startTime!: string;

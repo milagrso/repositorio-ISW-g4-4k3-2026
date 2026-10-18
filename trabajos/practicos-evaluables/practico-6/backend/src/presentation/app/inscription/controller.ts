@@ -11,7 +11,7 @@ export class InscriptionController {
     ) {}
 
     @ApiOperation({
-        path: ['/api/inscriptions/register', '/api/inscriptions'],
+        path: '/api/inscriptions',
         method: 'post',
         tags: ['Inscripciones'],
         summary: 'Registrar una nueva inscripción',
@@ -32,19 +32,20 @@ export class InscriptionController {
         },
     })
     public register = async (req: Request, res: Response) => {
-        const [error, dto] = RegisterInscriptionDto.create(req.body);
-
-        if (error) {
-            return res.status(400).json({ error });
-        }
-
         try {
+            const [error, dto] = RegisterInscriptionDto.create(req.body);
+
+            if (error) {
+                return res.status(400).json({ error });
+            }
+
             const result = await this.inscriptionService.register(dto!);
             return res.status(201).json(result);
         } catch (error: any) {
             const statusCode = error.statusCode || 500;
+            const message = statusCode >= 500 ? 'Error interno del servidor' : (error.message || 'Error interno del servidor');
             return res.status(statusCode).json({
-                error: error.message || 'Error interno del servidor'
+                error: message
             });
         }
     };

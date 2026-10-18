@@ -16,12 +16,11 @@ export class InscriptionService {
         private readonly parkRepository: ParkRepository,
         private readonly activityRepository: ActivityRepository,
         private readonly inscriptionRepository: InscriptionRepository,
-        private readonly userRepository: UserRepository,
-        private readonly emailHelper: EmailHelper,
-        private readonly qrHelper: QrHelper,
+        _userRepository?: UserRepository,
+        private readonly emailHelper: EmailHelper = new EmailHelper(),
+        private readonly qrHelper: QrHelper = new QrHelper(),
     ) {}
 
-    @Transactional()
     public async register(dto: RegisterInscriptionDto): Promise<RegisterInscriptionResponse> {
         // 1. Validar calendario del parque si dto.fecha está presente (cerrado lunes, 25/12, 01/01)
         if (dto.fecha) {
@@ -136,13 +135,7 @@ export class InscriptionService {
             }
         }
 
-        // 11. Reservar cupos en el repositorio
-        const reserved = await this.inscriptionRepository.reserveSlots(timeSlot.id, dto.cantidad);
-        if (!reserved) {
-            throw new ServiceError(Errors.NO_AVAILABLE_SLOTS);
-        }
-
-        // 12. Generar número de inscripción y códigos QR
+        // 11. Generar número de inscripción y códigos QR
         const numeroInscripcion = `EHP-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
 
         let qrCode = 'qr-data-string';
@@ -179,24 +172,10 @@ export class InscriptionService {
             })
         );
 
-        // 13. Crear y guardar la entidad Inscription
-        const inscription = InscriptionEntity.fromObject({
-            activityId: activity.id,
-            timeSlotId: timeSlot.id,
-            quantity: dto.cantidad,
-            participants: dto.participantes,
-            contactEmail: dto.emailContacto,
-            qrCode,
-            termsAccepted: dto.aceptaTerminos,
-            status: 'REGISTERED',
-            createdAt: new Date(),
-            fecha: dto.fecha,
-            numeroInscripcion,
-        });
+        // 12. Reservar cupos y guardar la inscripción de forma transaccional
+        await this.persistInscription(timeSlot.id, dto, activity.id, qrCode, numeroInscripcion);
 
-        await this.inscriptionRepository.save(inscription);
-
-        // 14. Enviar correo de confirmación
+        // 13. Enviar correo de confirmación (I/O externo fuera de la transacción DB)
         let emailFailed = false;
         try {
             await this.emailHelper.sendInscriptionConfirmation({
@@ -238,5 +217,35 @@ export class InscriptionService {
             horario: dto.horario,
             participantes: participantesWithQr,
         };
+    }
+
+    @Transactional()
+    private async persistInscription(
+        timeSlotId: string | number,
+        dto: RegisterInscriptionDto,
+        activityId: string | number,
+        qrCode: string,
+        numeroInscripcion: string
+    ): Promise<void> {
+        const reserved = await this.inscriptionRepository.reserveSlots(timeSlotId, dto.cantidad);
+        if (!reserved) {
+            throw new ServiceError(Errors.NO_AVAILABLE_SLOTS);
+        }
+
+        const inscription = InscriptionEntity.fromObject({
+            activityId,
+            timeSlotId,
+            quantity: dto.cantidad,
+            participants: dto.participantes,
+            contactEmail: dto.emailContacto,
+            qrCode,
+            termsAccepted: dto.aceptaTerminos,
+            status: 'REGISTERED',
+            createdAt: new Date(),
+            fecha: dto.fecha,
+            numeroInscripcion,
+        });
+
+        await this.inscriptionRepository.save(inscription);
     }
 }

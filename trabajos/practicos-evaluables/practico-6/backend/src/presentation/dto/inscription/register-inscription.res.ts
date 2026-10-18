@@ -123,8 +123,6 @@ export class RegisterInscriptionResponse {
         required: false,
     })
     participantes?: ParticipantResponse[];
-
-    inscriptionId?: string | number;
 }
 
 @ApiSchema({

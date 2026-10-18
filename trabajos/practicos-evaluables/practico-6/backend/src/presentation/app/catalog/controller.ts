@@ -3,7 +3,6 @@ import { CatalogService } from './catalog.service';
 import { ApiTag, ApiOperation } from '../../swagger/swagger.decorators';
 import {
     ActivityResponse,
-    TimeSlotAvailabilityResponse,
     TimeSlotResponse,
     ParkResponse,
     UserResponse,
@@ -17,8 +16,9 @@ export class CatalogController {
 
     private handleError = (error: any, res: Response, defaultMessage = 'Error interno del servidor') => {
         const statusCode = error.statusCode || 500;
+        const message = statusCode >= 500 ? defaultMessage : (error.message || defaultMessage);
         return res.status(statusCode).json({
-            error: error.message || defaultMessage,
+            error: message,
         });
     };
 
@@ -79,56 +79,24 @@ export class CatalogController {
     };
 
     @ApiOperation({
-        path: '/api/catalog/activities/{id}/turnos',
-        method: 'get',
-        tags: ['Catálogo'],
-        summary: 'Consultar disponibilidad de turnos por actividad y fecha',
-        description: 'Calcula cupos disponibles en la fecha indicada y si el turno es reservable según la ventana horaria y calendario.',
-        parameters: [
-            {
-                name: 'id',
-                in: 'path',
-                required: true,
-                schema: { type: 'string' },
-                description: 'ID de la actividad',
-            },
-            {
-                name: 'fecha',
-                in: 'query',
-                required: false,
-                schema: { type: 'string', format: 'date', example: '2026-10-17' },
-                description: 'Fecha a consultar en formato YYYY-MM-DD',
-            },
-        ],
-        responses: {
-            '200': {
-                description: 'Turnos disponibles calculados',
-                items: TimeSlotAvailabilityResponse,
-            },
-        },
-    })
-    public getActivityTimeSlots = async (req: Request, res: Response) => {
-        try {
-            const fecha = req.query.fecha ? String(req.query.fecha) : undefined;
-            const slots = await this.catalogService.getActivityTimeSlots(req.params.id, fecha);
-            return res.json(slots);
-        } catch (error: any) {
-            return this.handleError(error, res, 'Error al obtener turnos de la actividad');
-        }
-    };
-
-    @ApiOperation({
         path: '/api/catalog/time-slots',
         method: 'get',
         tags: ['Catálogo'],
-        summary: 'Listar todos los turnos plantilla',
+        summary: 'Listar todos los turnos',
         parameters: [
             {
-                name: 'fecha',
+                name: 'activityId',
+                in: 'query',
+                required: false,
+                schema: { type: 'integer' },
+                description: 'ID de la actividad para filtrar turnos',
+            },
+            {
+                name: 'date',
                 in: 'query',
                 required: false,
                 schema: { type: 'string', format: 'date' },
-                description: 'Fecha opcional para cálculo de cupos ocupados',
+                description: 'Fecha en formato YYYY-MM-DD para filtrar turnos',
             },
         ],
         responses: {
@@ -140,8 +108,10 @@ export class CatalogController {
     })
     public getTimeSlots = async (req: Request, res: Response) => {
         try {
-            const fecha = req.query.fecha ? String(req.query.fecha) : undefined;
-            const slots = await this.catalogService.getTimeSlots(fecha);
+            const rawDate = req.query.date ?? req.query.fecha;
+            const date = rawDate ? String(rawDate) : undefined;
+            const activityId = req.query.activityId ? String(req.query.activityId) : undefined;
+            const slots = await this.catalogService.getTimeSlots(date, activityId);
             return res.json(slots);
         } catch (error: any) {
             return this.handleError(error, res, 'Error al obtener turnos');
@@ -166,12 +136,15 @@ export class CatalogController {
                 description: 'Detalle del turno',
                 schema: TimeSlotResponse,
             },
+            '404': {
+                description: 'Turno no encontrado',
+                schema: ErrorResponse,
+            },
         },
     })
     public getTimeSlotById = async (req: Request, res: Response) => {
         try {
-            const fecha = req.query.fecha ? String(req.query.fecha) : undefined;
-            const slot = await this.catalogService.getTimeSlotById(req.params.id, fecha);
+            const slot = await this.catalogService.getTimeSlotById(req.params.id);
             return res.json(slot);
         } catch (error: any) {
             return this.handleError(error, res, 'Turno no encontrado');
@@ -216,6 +189,10 @@ export class CatalogController {
             '200': {
                 description: 'Detalle del parque',
                 schema: ParkResponse,
+            },
+            '404': {
+                description: 'Parque no encontrado',
+                schema: ErrorResponse,
             },
         },
     })

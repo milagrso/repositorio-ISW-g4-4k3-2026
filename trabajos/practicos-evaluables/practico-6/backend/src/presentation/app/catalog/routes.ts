@@ -23,7 +23,6 @@ export class CatalogRoutes {
 
         // Activities
         router.get('/activities', controller.getActivities);
-        router.get('/activities/:id/turnos', controller.getActivityTimeSlots);
         router.get('/activities/:id', controller.getActivityById);
 
         // Time slots

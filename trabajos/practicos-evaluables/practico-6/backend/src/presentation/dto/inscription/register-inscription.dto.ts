@@ -122,6 +122,10 @@ export class RegisterInscriptionDto {
     }
 
     static create(raw: Record<string, any>): [string?, RegisterInscriptionDto?] {
+        if (!raw || typeof raw !== 'object' || Array.isArray(raw)) {
+            return [Errors.ACTIVITY_REQUIRED.message, undefined];
+        }
+
         const {
             actividad,
             horario,
