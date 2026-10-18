@@ -4,6 +4,7 @@ import { isClosedHoliday } from './holidays.js'
 export const NAME_MAX = 60
 export const DNI_MAX = 8
 export const AGE_MAX = 3
+export const CLOTH_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
 
 const namePattern = /^[\p{L}]+(?: \p{L}+)*$/u
 
@@ -211,13 +212,10 @@ export function validateInscription(form, activity, options = {}) {
     }
 
     if (activity?.requiresSize) {
-      if (!/^\d+$/.test(visitor.talle)) {
-        item.talle = 'Ingresá el talle de calzado.'
-      } else {
-        const size = Number(visitor.talle)
-        if (!Number.isInteger(size) || size < 19 || size > 48) {
-          item.talle = 'El talle de calzado debe estar entre 19 y 48.'
-        }
+      if (!visitor.talle) {
+        item.talle = 'Ingresá el talle de vestimenta.'
+      } else if (!CLOTH_SIZES.includes(visitor.talle)) {
+        item.talle = 'El talle de vestimenta disponible es XS, S, M, L, XL, XXL.'
       }
     }
 

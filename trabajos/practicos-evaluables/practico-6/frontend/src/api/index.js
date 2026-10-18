@@ -43,7 +43,7 @@ export function createInscription(input) {
       dni: Number(visitor.dni),
       edad: Number(visitor.edad),
     }
-    if (activity.requiresSize) participant.talleCalzado = Number(visitor.talle)
+    if (activity.requiresSize) participant.talleVestimenta = visitor.talle
     return participant
   })
 

@@ -5,6 +5,7 @@ import { Check, Minus, Plus, Trash2 } from 'lucide-react'
 import { ApiError, createInscription, useActivities, usePark, useSlots } from '../api/index.js'
 import {
   AGE_MAX,
+  CLOTH_SIZES,
   DNI_MAX,
   NAME_MAX,
   emptyVisitor,
@@ -651,22 +652,24 @@ export default function Inscripcion() {
                       {activity?.requiresSize ? (
                         <label className="form-control w-full">
                           <span className="label-text mb-1 block">
-                            Talle de calzado
+                            Talle de vestimenta
                             <RequiredMark />
                           </span>
-                          <input
-                            type="text"
+                          <select
                             required
-                            inputMode="numeric"
-                            autoComplete="off"
-                            maxLength={2}
-                            placeholder="19 a 48"
-                            className={`input input-bordered w-full ${visitorErrors.talle ? 'input-error' : ''}`}
+                            className={`select select-bordered w-full ${visitorErrors.talle ? 'select-error' : ''}`}
                             value={visitor.talle}
-                            onChange={(event) =>
-                              updateVisitor(index, 'talle', sanitizeDigits(event.target.value, 2))
-                            }
-                          />
+                            onChange={(event) => updateVisitor(index, 'talle', event.target.value)}
+                          >
+                            <option value="" disabled>
+                              Elegí un talle
+                            </option>
+                            {CLOTH_SIZES.map((size) => (
+                              <option key={size} value={size}>
+                                {size}
+                              </option>
+                            ))}
+                          </select>
                           <FieldError message={visitorErrors.talle} />
                         </label>
                       ) : null}
@@ -715,7 +718,7 @@ export default function Inscripcion() {
                       <p className="font-semibold">{visitor.nombre || `Persona ${index + 1}`}</p>
                       <p className="text-base-content/70">
                         DNI {visitor.dni || '—'} · {visitor.edad || '—'} años
-                        {activity.requiresSize ? ` · Calzado ${visitor.talle || '—'}` : ''}
+                        {activity.requiresSize ? ` · Talle ${visitor.talle || '—'}` : ''}
                       </p>
                     </li>
                   ))}

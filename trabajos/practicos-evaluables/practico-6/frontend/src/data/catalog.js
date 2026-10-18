@@ -65,7 +65,7 @@ export const activityRecords = [
     summary: 'Escalada en el muro del parque, con instructor.',
     requiresSize: true,
     terms:
-      'Acepto usar arnés y el calzado indicado, informar si es mi primera vez y escalar solo las vías que habilite el instructor.',
+      'Acepto usar arnés y la vestimenta indicada, informar si es mi primera vez y escalar solo las vías que habilite el instructor.',
     minAge: 12,
     schedules: everyOpenDay(12),
   },

@@ -98,7 +98,7 @@ export default function ConfirmationEmail({ registration, onReset }) {
                 <p className="font-semibold">{visitor.nombre}</p>
                 <p>DNI {visitor.dni}</p>
                 <p>Edad {visitor.edad}</p>
-                {registration.requiresSize ? <p>Calzado {visitor.talle}</p> : null}
+                {registration.requiresSize ? <p>Talle {visitor.talle}</p> : null}
               </li>
             ))}
           </ul>
