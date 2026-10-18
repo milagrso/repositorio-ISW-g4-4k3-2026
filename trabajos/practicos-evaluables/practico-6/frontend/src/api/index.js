@@ -52,6 +52,7 @@ export function createInscription(input) {
     body: {
       actividad: activity.name,
       horario: input.time,
+      fecha: input.date,
       cantidad: input.people,
       aceptaTerminos: Boolean(input.acceptedTerms),
       emailContacto: input.email,

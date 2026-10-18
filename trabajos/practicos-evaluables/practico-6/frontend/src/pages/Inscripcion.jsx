@@ -282,6 +282,7 @@ export default function Inscripcion() {
     try {
       const result = await createInscription({
         activityId: activity.id,
+        date: form.date,
         time: form.time,
         people,
         email: form.email.trim(),
