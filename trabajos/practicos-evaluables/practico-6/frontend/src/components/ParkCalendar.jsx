@@ -1,6 +1,7 @@
 import { DayPicker } from 'react-day-picker'
 import { es } from 'react-day-picker/locale/es'
 import 'react-day-picker/style.css'
+import { closedHolidaysInMonth, isClosedHoliday } from '../lib/holidays.js'
 import { formatDayMonth, parseISODate, todayDate, todayISO, toISODate } from '../lib/inscription.js'
 
 export default function ParkCalendar({
@@ -8,9 +9,6 @@ export default function ParkCalendar({
   onChange,
   month,
   onMonthChange,
-  holidays,
-  status,
-  onRetry,
   invalid,
   closedWeekdays = [1],
 }) {
@@ -18,10 +16,9 @@ export default function ParkCalendar({
   const selected = value ? parseISODate(value) : undefined
   const startMonth = new Date(today.getFullYear(), today.getMonth(), 1)
   const endMonth = new Date(today.getFullYear() + 1, 11, 1)
-  const ready = status === 'ready'
-  const holidayDates = holidays.map((item) => parseISODate(item.fecha))
-  const monthKey = `${month.getFullYear()}-${String(month.getMonth() + 1).padStart(2, '0')}`
-  const monthHolidays = holidays.filter((item) => item.fecha.startsWith(monthKey) && item.fecha >= todayISO())
+  const monthHolidays = closedHolidaysInMonth(month.getFullYear(), month.getMonth()).filter(
+    (item) => item.fecha >= todayISO(),
+  )
 
   return (
     <div className="grid gap-3">
@@ -39,26 +36,15 @@ export default function ParkCalendar({
           if (!date) return
           onChange(toISODate(date))
         }}
-        disabled={
-          ready
-            ? [{ before: today }, { dayOfWeek: closedWeekdays }, ...holidayDates]
-            : true
-        }
+        disabled={[
+          { before: today },
+          { dayOfWeek: closedWeekdays },
+          (date) => isClosedHoliday(toISODate(date)),
+        ]}
       />
 
-      {status === 'loading' ? <p className="text-base-content/70 text-sm">Consultando feriados…</p> : null}
-
-      {status === 'error' ? (
-        <div className="alert alert-warning items-start text-sm">
-          <span>No pudimos consultar los feriados.</span>
-          <button type="button" className="btn btn-sm btn-outline" onClick={onRetry}>
-            Reintentar
-          </button>
-        </div>
-      ) : null}
-
       <p className="text-base-content/70 text-sm">
-        No se pueden elegir fechas pasadas, los lunes ni los feriados.
+        No se pueden elegir fechas pasadas, los lunes, el 25 de diciembre ni el 1 de enero.
       </p>
 
       {monthHolidays.length > 0 ? (

@@ -21,7 +21,6 @@ import {
   validateInscription,
   validateStep,
 } from '../lib/inscription.js'
-import { useHolidays, yearsForMonth } from '../lib/holidays.js'
 import ConfirmationEmail from '../components/ConfirmationEmail.jsx'
 import ParkCalendar from '../components/ParkCalendar.jsx'
 import PeopleSky from '../components/PeopleSky.jsx'
@@ -131,27 +130,22 @@ export default function Inscripcion() {
 
   const reduce = useReducedMotion()
   const [calendarMonth, setCalendarMonth] = useState(() => todayDate())
-  const holidayYears = useMemo(() => yearsForMonth(calendarMonth), [calendarMonth])
-  const { holidays, holidaySet, status: holidayStatus, retry: retryHolidays } = useHolidays(holidayYears)
   const { slots, status: slotsStatus, retry: retrySlots } = useSlots(activity?.id, form.date)
   // El tope de personas es el cupo del horario elegido. Sin horario todavía, no hay tope.
   const peopleLimit = slotCapacity(slots, form.time)
   const closedWeekdays = park?.closedWeekdays ?? [1]
   const rules = useMemo(
     () => ({
-      holidays: holidaySet,
-      holidaysReady: holidayStatus === 'ready',
-      holidaysError: holidayStatus === 'error',
       slots,
       slotsReady: !form.date || slotsStatus === 'ready',
       slotsError: slotsStatus === 'error',
       closedWeekdays,
     }),
-    [closedWeekdays, form.date, holidaySet, holidayStatus, slots, slotsStatus],
+    [closedWeekdays, form.date, slots, slotsStatus],
   )
   const scheduleMessage =
     form.date && form.time && slotsStatus === 'ready'
-      ? slotProblem(slots, form.date, form.time, form.people, holidaySet, closedWeekdays)
+      ? slotProblem(slots, form.date, form.time, form.people, closedWeekdays)
       : null
   const messages = useMemo(
     () => errorList(errors).filter((message) => message !== scheduleMessage),
@@ -438,9 +432,6 @@ export default function Inscripcion() {
                     value={form.date}
                     month={calendarMonth}
                     onMonthChange={setCalendarMonth}
-                    holidays={holidays}
-                    status={holidayStatus}
-                    onRetry={retryHolidays}
                     closedWeekdays={closedWeekdays}
                     invalid={Boolean(errors.date)}
                     onChange={(date) => {

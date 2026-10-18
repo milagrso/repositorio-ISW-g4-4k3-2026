@@ -1,3 +1,5 @@
+import { isClosedHoliday } from './holidays.js'
+
 export const NAME_MAX = 60
 export const DNI_MAX = 8
 export const AGE_MAX = 3
@@ -81,7 +83,7 @@ export function slotCapacity(slots, time) {
   return slot ? slot.capacity : null
 }
 
-export function slotProblem(slots, date, time, people, holidays, closedWeekdays = [1]) {
+export function slotProblem(slots, date, time, people, closedWeekdays = [1]) {
   if (!date || !time) return null
 
   const slot = (slots ?? []).find((item) => item.time === time)
@@ -89,7 +91,11 @@ export function slotProblem(slots, date, time, people, holidays, closedWeekdays 
 
   if (isPastDate(date)) return 'No podés elegir una fecha pasada.'
 
-  if (isClosedWeekday(date, closedWeekdays) || holidays?.has(date) || slot.status === 'closed') {
+  if (isClosedWeekday(date, closedWeekdays) || isClosedHoliday(date)) {
+    return 'El parque está cerrado en la fecha seleccionada.'
+  }
+
+  if (slot.status === 'closed') {
     return 'El parque está cerrado en el horario seleccionado.'
   }
 
@@ -112,24 +118,17 @@ export function slotProblem(slots, date, time, people, holidays, closedWeekdays 
 
 export function validateInscription(form, activity, options = {}) {
   const errors = {}
-  const holidays = options.holidays ?? null
   const closedWeekdays = options.closedWeekdays ?? [1]
 
   if (!activity) errors.activity = 'Seleccioná una actividad.'
 
   let dateReady = false
-  if (options.holidaysReady === false) {
-    errors.date = options.holidaysError
-      ? 'No pudimos consultar los feriados. Reintentá.'
-      : 'Estamos consultando los feriados.'
-  } else if (!form.date) {
+  if (!form.date) {
     errors.date = 'Seleccioná una fecha.'
   } else if (isPastDate(form.date)) {
     errors.date = 'No podés elegir una fecha pasada.'
-  } else if (isClosedWeekday(form.date, closedWeekdays)) {
-    errors.date = 'El parque no abre los lunes.'
-  } else if (holidays?.has(form.date)) {
-    errors.date = 'Ese día es feriado y el parque está cerrado.'
+  } else if (isClosedWeekday(form.date, closedWeekdays) || isClosedHoliday(form.date)) {
+    errors.date = 'El parque está cerrado en la fecha seleccionada.'
   } else {
     dateReady = true
   }
@@ -159,7 +158,6 @@ export function validateInscription(form, activity, options = {}) {
       form.date,
       form.time,
       form.people,
-      holidays,
       closedWeekdays,
     )
     if (scheduleError) errors.schedule = scheduleError
@@ -231,7 +229,6 @@ export function validateStep(step, form, activity, options) {
         form.date,
         form.time,
         1,
-        options.holidays,
         options.closedWeekdays,
       )
       if (schedule) errors.schedule = schedule

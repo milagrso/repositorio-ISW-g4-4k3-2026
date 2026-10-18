@@ -1,83 +1,19 @@
-import { useEffect, useMemo, useState } from 'react'
+// Además de los lunes, el parque cierra solo el 25 de diciembre y el 1 de enero.
+// No se toman otros feriados.
+export const closedHolidays = [
+  { monthDay: '12-25', nombre: 'Navidad' },
+  { monthDay: '01-01', nombre: 'Año Nuevo' },
+]
 
-const cache = new Map()
-
-export function yearsForMonth(month) {
-  const year = month.getFullYear()
-  const index = month.getMonth()
-  if (index === 0) return [year - 1, year]
-  if (index === 11) return [year, year + 1]
-  return [year]
+export function isClosedHoliday(dateStr) {
+  if (!dateStr) return false
+  return closedHolidays.some((item) => dateStr.endsWith(`-${item.monthDay}`))
 }
 
-export function clearHolidayCache(year) {
-  cache.delete(String(year))
-}
-
-export function fetchHolidays(year) {
-  const key = String(year)
-  if (!cache.has(key)) {
-    const request = fetch(`https://api.argentinadatos.com/v1/feriados/${year}`)
-      .then(async (response) => {
-        if (!response.ok) throw new Error('No se pudieron consultar los feriados.')
-        const data = await response.json()
-        if (!Array.isArray(data)) throw new Error('No se pudieron consultar los feriados.')
-        return data
-          .filter((item) => typeof item?.fecha === 'string')
-          .map((item) => ({ fecha: item.fecha, nombre: item.nombre || 'Feriado' }))
-      })
-      .catch((error) => {
-        cache.delete(key)
-        throw error
-      })
-    cache.set(key, request)
-  }
-  return cache.get(key)
-}
-
-export function useHolidays(years) {
-  const key = years.join(',')
-  const [store, setStore] = useState({})
-  const [status, setStatus] = useState('loading')
-  const [attempt, setAttempt] = useState(0)
-
-  useEffect(() => {
-    let cancelled = false
-    const yearList = key.split(',').filter(Boolean).map(Number)
-    setStatus('loading')
-
-    Promise.all(yearList.map((year) => fetchHolidays(year)))
-      .then((lists) => {
-        if (cancelled) return
-        setStore((current) => {
-          const next = { ...current }
-          yearList.forEach((year, index) => {
-            next[year] = lists[index]
-          })
-          return next
-        })
-        setStatus('ready')
-      })
-      .catch(() => {
-        if (cancelled) return
-        setStatus('error')
-      })
-
-    return () => {
-      cancelled = true
-    }
-  }, [key, attempt])
-
-  const holidays = useMemo(() => Object.values(store).flat(), [store])
-  const holidaySet = useMemo(() => new Set(holidays.map((item) => item.fecha)), [holidays])
-
-  return {
-    holidays,
-    holidaySet,
-    status,
-    retry() {
-      years.forEach((year) => clearHolidayCache(year))
-      setAttempt((current) => current + 1)
-    },
-  }
+// Los días de cierre que caen en un mes, para listarlos debajo del calendario.
+export function closedHolidaysInMonth(year, monthIndex) {
+  const month = String(monthIndex + 1).padStart(2, '0')
+  return closedHolidays
+    .filter((item) => item.monthDay.startsWith(`${month}-`))
+    .map((item) => ({ fecha: `${year}-${item.monthDay}`, nombre: item.nombre }))
 }
