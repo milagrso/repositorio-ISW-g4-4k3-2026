@@ -65,6 +65,13 @@ describe('Pruebas unitarias para el InscriptionService', () => {
             emailHelperMock,
             qrHelperMock,
         );
+
+        jest.useFakeTimers();
+        jest.setSystemTime(new Date('2026-10-15T18:00:00.000-03:00'));
+    });
+
+    afterAll(() => {
+        jest.useRealTimers();
     });
 
 
@@ -1113,7 +1120,7 @@ describe('Pruebas unitarias para el InscriptionService', () => {
         it('debe permitir la inscripción cuando se realiza exactamente 24 horas antes del turno', async () => {
             // Arrange
             jest.useFakeTimers();
-            jest.setSystemTime(new Date('2026-10-15T10:00:00.000Z'));
+            jest.setSystemTime(new Date('2026-10-15T10:00:00.000-03:00'));
 
             const activity = createActivityFixture({ id: 2, name: 'Safari' });
             const slot = createTimeSlotFixture({ id: 10, startTime: '10:00', maxCapacity: 8, occupiedSlots: 3 });
@@ -1145,7 +1152,7 @@ describe('Pruebas unitarias para el InscriptionService', () => {
         it('debe rechazar la inscripción con más de 24 horas de anticipación', async () => {
             // Arrange
             jest.useFakeTimers();
-            jest.setSystemTime(new Date('2026-10-15T09:59:00.000Z'));
+            jest.setSystemTime(new Date('2026-10-15T09:59:00.000-03:00'));
 
             const activity = createActivityFixture({ id: 2, name: 'Safari' });
             const slot = createTimeSlotFixture({ id: 10, startTime: '10:00', maxCapacity: 8, occupiedSlots: 3 });
@@ -1177,7 +1184,7 @@ describe('Pruebas unitarias para el InscriptionService', () => {
         it('debe permitir la inscripción cuando se realiza exactamente 15 minutos antes del turno', async () => {
             // Arrange
             jest.useFakeTimers();
-            jest.setSystemTime(new Date('2026-10-16T09:45:00.000Z'));
+            jest.setSystemTime(new Date('2026-10-16T09:45:00.000-03:00'));
 
             const activity = createActivityFixture({ id: 2, name: 'Safari' });
             const slot = createTimeSlotFixture({ id: 10, startTime: '10:00', maxCapacity: 8, occupiedSlots: 3 });
@@ -1209,7 +1216,7 @@ describe('Pruebas unitarias para el InscriptionService', () => {
         it('debe rechazar la inscripción con menos de 15 minutos de anticipación al turno', async () => {
             // Arrange
             jest.useFakeTimers();
-            jest.setSystemTime(new Date('2026-10-16T09:46:00.000Z'));
+            jest.setSystemTime(new Date('2026-10-16T09:46:00.000-03:00'));
 
             const activity = createActivityFixture({ id: 2, name: 'Safari' });
             const slot = createTimeSlotFixture({ id: 10, startTime: '10:00', maxCapacity: 8, occupiedSlots: 3 });
@@ -1432,6 +1439,8 @@ describe('Pruebas unitarias para el InscriptionService', () => {
     describe('test_inscripcion_exitosa_retorna_datos_completos', () => {
         it('debe retornar los datos completos de la reserva para el frontend en una inscripción exitosa', async () => {
             // Arrange
+            jest.setSystemTime(new Date('2026-10-16T18:00:00.000-03:00'));
+
             const activity = createActivityFixture({
                 id: 1,
                 name: 'Tirolesa',
