@@ -1,8 +1,6 @@
 export class ClothEntity {
     private constructor(
         public tipo: string,
-        public talleMinimo: number | string,
-        public talleMaximo: number | string,
         public tallesValidos?: string[]
     ) {}
 
@@ -12,20 +10,16 @@ export class ClothEntity {
             return valid.includes(size.toUpperCase());
         }
         if (typeof size === 'number') {
-            const min = typeof this.talleMinimo === 'number' ? this.talleMinimo : 19;
-            const max = typeof this.talleMaximo === 'number' ? this.talleMaximo : 48;
-            return Number.isInteger(size) && size >= min && size <= max;
+            return Number.isInteger(size) && size >= 19 && size <= 48;
         }
         return false;
     }
 
     static fromObject(object: { [key: string]: any }): ClothEntity {
-        const { tipo, talleMinimo, talleMaximo, tallesValidos } = object;
+        const { tipo, tallesValidos } = object;
 
         return new ClothEntity(
             tipo,
-            talleMinimo,
-            talleMaximo,
             tallesValidos
         );
     }

@@ -21,8 +21,6 @@ export const createRegisterInscriptionRawFixture = (overrides: Record<string, an
 
 export const createClothFixture = (overrides: Record<string, any> = {}) => ({
     tipo: 'VESTIMENTA',
-    talleMinimo: 'XS',
-    talleMaximo: 'XXL',
     tallesValidos: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
     isValidSize: (size: any) => {
         if (typeof size === 'string') return ['XS', 'S', 'M', 'L', 'XL', 'XXL'].includes(size);

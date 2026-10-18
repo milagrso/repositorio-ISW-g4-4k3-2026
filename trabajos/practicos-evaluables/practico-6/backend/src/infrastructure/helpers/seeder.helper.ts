@@ -38,8 +38,6 @@ export class SeederHelper {
                     enabled: true,
                     cloth: {
                         tipo: 'VESTIMENTA',
-                        talleMinimo: 'XS',
-                        talleMaximo: 'XXL',
                         tallesValidos: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
                     },
                     minAge: 12,
@@ -59,8 +57,6 @@ export class SeederHelper {
                     enabled: true,
                     cloth: {
                         tipo: 'VESTIMENTA',
-                        talleMinimo: 'XS',
-                        talleMaximo: 'XXL',
                         tallesValidos: ['XS', 'S', 'M', 'L', 'XL', 'XXL'],
                     },
                     minAge: 8,
