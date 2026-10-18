@@ -1,10 +1,5 @@
-// Database & Models
+// Database Initializer
 export * from './postgresql/initializer/database';
-export * from './postgresql/models/activity.model';
-export * from './postgresql/models/time-slot.model';
-export * from './postgresql/models/inscription.model';
-export * from './postgresql/models/user.model';
-export * from './postgresql/models/park.model';
 
 // Data Sources
 export * from './data-sources/activity';

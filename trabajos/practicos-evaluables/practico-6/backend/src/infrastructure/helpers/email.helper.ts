@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import nodemailer, { createTransport, Transporter } from 'nodemailer';
+import { createTransport, Transporter } from 'nodemailer';
 import QRCode from 'qrcode';
 import { env } from '../../config';
 import { ServiceError } from '../../domain/messages/service.error';

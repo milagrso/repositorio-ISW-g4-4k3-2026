@@ -21,20 +21,22 @@ export class QrHelper {
 
         if (data && typeof data === 'object') {
             const horario = data.horario ?? '';
-            const firstDni = data.participantes?.[0]?.dni ?? '0';
+            const rawParticipantes = Array.isArray(data.participantes)
+                ? data.participantes
+                : (data.participante ? [data.participante] : []);
+
+            const firstDni = rawParticipantes[0]?.dni ?? '0';
             const reserva = `EHP-ACT-${horario}-${firstDni}`;
 
             const formatted = {
                 reserva,
                 actividad: data.actividad,
                 horario: data.horario,
-                cantidad: data.cantidad,
-                participantes: Array.isArray(data.participantes)
-                    ? data.participantes.map((p: any) => ({
-                          nombre: p.nombre,
-                          dni: p.dni,
-                      }))
-                    : [],
+                cantidad: data.cantidad ?? rawParticipantes.length,
+                participantes: rawParticipantes.map((p: any) => ({
+                    nombre: p.nombre,
+                    dni: p.dni,
+                })),
             };
 
             return JSON.stringify(formatted);
