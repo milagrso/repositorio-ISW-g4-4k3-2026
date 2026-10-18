@@ -290,36 +290,25 @@ export default function Inscripcion() {
         visitors,
       })
       const dateLabel = formatDate(form.date)
-      const code = result.inscriptionId != null ? String(result.inscriptionId) : ''
-      const visitorLines = visitors
-        .map((visitor) => {
-          const size = activity.requiresSize ? `, talle ${visitor.talle}` : ''
-          return `${visitor.nombre}, DNI ${visitor.dni}, ${visitor.edad} años${size}`
-        })
-        .join('\n')
+      const code = result.numeroInscripcion ?? (result.inscriptionId != null ? String(result.inscriptionId) : '')
+      // El backend devuelve un QR por participante; si no viene, el mail lo arma con estos datos.
+      const backendQr = new Map(
+        (result.participantes ?? []).filter((item) => item.qr).map((item) => [String(item.dni), item.qr]),
+      )
       setConfirmation({
         code,
         message: result.message || '',
         emailFailed: result.emailStatus === 'FAILED',
         email: form.email.trim(),
+        sentAt: clock.now,
+        parkName: park?.name ?? 'EcoHarmony Park',
         activityName: activity.name,
         date: form.date,
         dateLabel,
         time: form.time,
         requiresSize: activity.requiresSize,
         image: activity.image,
-        visitors,
-        qrText: [
-          park?.name ?? 'EcoHarmony Park',
-          code ? `Inscripción: ${code}` : null,
-          `Actividad: ${activity.name}`,
-          `Fecha: ${dateLabel}`,
-          `Horario: ${form.time}`,
-          'Visitantes:',
-          visitorLines,
-        ]
-          .filter(Boolean)
-          .join('\n'),
+        visitors: visitors.map((visitor) => ({ ...visitor, qr: backendQr.get(visitor.dni) ?? null })),
       })
       scrollTop()
     } catch (error) {

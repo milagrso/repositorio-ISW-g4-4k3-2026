@@ -57,6 +57,21 @@ export function parkDateTime(instant) {
   return { date: `${part.year}-${part.month}-${part.day}`, time: `${part.hour}:${part.minute}` }
 }
 
+const sentFormat = new Intl.DateTimeFormat('es-AR', {
+  timeZone: PARK_TIME_ZONE,
+  weekday: 'long',
+  day: 'numeric',
+  month: 'long',
+  hour: '2-digit',
+  minute: '2-digit',
+  hourCycle: 'h23',
+})
+
+// Fecha y hora del parque para mostrar, por ejemplo «sábado, 17 de octubre, 22:58».
+export function formatParkDateTime(instant) {
+  return sentFormat.format(instant)
+}
+
 export function addDays(dateStr, days) {
   const [year, month, day] = dateStr.split('-').map(Number)
   return new Date(Date.UTC(year, month - 1, day + days)).toISOString().slice(0, 10)
