@@ -259,4 +259,8 @@ export const Errors: Record<string, AppError> = {
         statusCode: 404,
         message: 'Usuario de sesión no encontrado',
     },
+    EMAIL_TEMPLATE_NOT_FOUND: {
+        statusCode: 500,
+        message: 'No se encontró la plantilla de correo electrónico',
+    },
 };

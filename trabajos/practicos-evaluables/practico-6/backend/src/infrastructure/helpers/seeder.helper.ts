@@ -69,35 +69,91 @@ export class SeederHelper {
                 },
             ];
 
-            for (const actData of activities) {
+            const hours = [
+                { start: '09:00', end: '10:00' },
+                { start: '10:00', end: '11:00' },
+                { start: '11:00', end: '12:00' },
+                { start: '12:00', end: '13:00' },
+                { start: '13:00', end: '14:00' },
+                { start: '14:00', end: '15:00' },
+                { start: '15:00', end: '16:00' },
+                { start: '16:00', end: '17:00' },
+                { start: '17:00', end: '18:00' },
+            ];
+
+            // Generar fechas desde hoy hasta el 31 de diciembre del año actual
+            const now = new Date();
+            const currentYear = now.getFullYear();
+            const startDate = new Date(Date.UTC(currentYear, now.getMonth(), now.getDate(), 12, 0, 0));
+            const endDate = new Date(Date.UTC(currentYear, 11, 31, 12, 0, 0));
+
+            const openDates: string[] = [];
+            for (let d = new Date(startDate); d <= endDate; d.setUTCDate(d.getUTCDate() + 1)) {
+                const dayOfWeek = d.getUTCDay(); // 1 = Lunes
+                const month = d.getUTCMonth() + 1;
+                const day = d.getUTCDate();
+                if (dayOfWeek === 1 || (month === 12 && day === 25)) {
+                    continue;
+                }
+                const yyyy = d.getUTCFullYear();
+                const mm = String(month).padStart(2, '0');
+                const dd = String(day).padStart(2, '0');
+                openDates.push(`${yyyy}-${mm}-${dd}`);
+            }
+
+            // Distribución natural y determinista de cupos ocupados:
+            // - algunos turnos agotados (sin cupos: occupied === maxCapacity)
+            // - varios turnos con pocos cupos libres (1, 2 o 3 lugares disponibles)
+            // - algunos con ocupación media y unos pocos libres
+            const getNaturalOccupiedSlots = (maxCapacity: number, actIdx: number, dateIdx: number, hourIdx: number): number => {
+                const seed = (actIdx * 7 + dateIdx * 13 + hourIdx * 5) % 10;
+                switch (seed) {
+                    case 0:
+                    case 1:
+                        return maxCapacity; // Sin cupos (0 disponibles)
+                    case 2:
+                    case 3:
+                        return Math.max(0, maxCapacity - 1); // Solo 1 cupo disponible
+                    case 4:
+                    case 5:
+                        return Math.max(0, maxCapacity - 2); // Solo 2 cupos disponibles
+                    case 6:
+                    case 7:
+                        return Math.max(0, maxCapacity - 3); // 3 cupos disponibles
+                    case 8:
+                        return Math.floor(maxCapacity / 2); // Mitad de cupos disponibles
+                    default:
+                        return 0; // Turno con cupo completo disponible
+                }
+            };
+
+            const timeSlotsToInsert: Array<Record<string, any>> = [];
+
+            for (let actIdx = 0; actIdx < activities.length; actIdx++) {
+                const actData = activities[actIdx];
                 const activity = await ActivityModel.create(actData);
                 const activityId = activity.dataValues.id;
                 const maxCapacity = actData.maxCapacityActivity;
 
-                // 3. Seed TimeSlots (09:00 to 17:00 hourly - 9 slots per activity)
-                const hours = [
-                    { start: '09:00', end: '10:00' },
-                    { start: '10:00', end: '11:00' },
-                    { start: '11:00', end: '12:00' },
-                    { start: '12:00', end: '13:00' },
-                    { start: '13:00', end: '14:00' },
-                    { start: '14:00', end: '15:00' },
-                    { start: '15:00', end: '16:00' },
-                    { start: '16:00', end: '17:00' },
-                    { start: '17:00', end: '18:00' },
-                ];
-
-                for (const h of hours) {
-                    await TimeSlotModel.create({
-                        activityId,
-                        startTime: h.start,
-                        endTime: h.end,
-                        maxCapacity,
-                        occupiedSlots: 0,
-                    });
+                for (let dateIdx = 0; dateIdx < openDates.length; dateIdx++) {
+                    const fecha = openDates[dateIdx];
+                    for (let hourIdx = 0; hourIdx < hours.length; hourIdx++) {
+                        const h = hours[hourIdx];
+                        const occupiedSlots = getNaturalOccupiedSlots(maxCapacity, actIdx, dateIdx, hourIdx);
+                        timeSlotsToInsert.push({
+                            activityId,
+                            startTime: h.start,
+                            endTime: h.end,
+                            maxCapacity,
+                            occupiedSlots,
+                            fecha,
+                        });
+                    }
                 }
             }
-            console.log('[SeederHelper] Activities and TimeSlots seeded successfully');
+
+            await TimeSlotModel.bulkCreate(timeSlotsToInsert);
+            console.log(`[SeederHelper] Seeded ${activities.length} activities and ${timeSlotsToInsert.length} TimeSlots until ${currentYear}-12-31`);
 
             // 4. Seed User
             const email = env.SESSION_USER_EMAIL || env.SEED_USER_EMAIL;

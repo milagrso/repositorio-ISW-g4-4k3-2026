@@ -4,9 +4,7 @@ import { InscriptionRepository } from '../../../domain/repositories/inscription.
 import { UserRepository } from '../../../domain/repositories/user.repository';
 import { ServiceError } from '../../../domain/messages/service.error';
 import { Errors } from '../../../domain/messages/error-type.constants';
-import { getArgentinaIsoString } from '../../helpers/time.helper';
-
-export { getArgentinaIsoString } from '../../helpers/time.helper';
+import { TimeHelper } from '../../helpers/time.helper';
 
 export class CatalogService {
     constructor(
@@ -59,8 +57,7 @@ export class CatalogService {
                     reservable = false;
                     motivo = 'Parque cerrado';
                 } else {
-                    const [hours, minutes] = slot.startTime.split(':').map(Number);
-                    const slotDateTime = new Date(Date.UTC(year, month - 1, day, hours, minutes, 0, 0)).getTime();
+                    const slotDateTime = TimeHelper.parseArgentinaDateTime(fecha, slot.startTime);
                     const now = new Date().getTime();
                     const diffMs = slotDateTime - now;
 
@@ -163,7 +160,7 @@ export class CatalogService {
 
     public getServerTime() {
         return {
-            now: getArgentinaIsoString(),
+            now: TimeHelper.getArgentinaIsoString(),
         };
     }
 

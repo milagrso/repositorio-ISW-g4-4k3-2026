@@ -25,8 +25,8 @@ export class InscriptionRepository_I implements InscriptionRepository {
         return this.dataSource.findActiveByParticipantDniAndSchedule(dni, horario, fecha);
     }
 
-    public reserveSlots(timeSlotId: string | number, quantity: number, fecha?: string): Promise<boolean> {
-        return this.dataSource.reserveSlots(timeSlotId, quantity, fecha);
+    public reserveSlots(timeSlotId: string | number, quantity: number): Promise<boolean> {
+        return this.dataSource.reserveSlots(timeSlotId, quantity);
     }
 
     public save(inscription: InscriptionEntity | any): Promise<InscriptionEntity | any> {

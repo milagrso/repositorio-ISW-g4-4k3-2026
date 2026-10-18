@@ -2,7 +2,7 @@ import { Sequelize } from "sequelize";
 import { env } from "../../../config";
 
 export class PostgreSQLDatabase {
-
+    private static activeInstance: Sequelize | null = null;
     public sequelize: Sequelize;
 
     constructor(){
@@ -12,6 +12,14 @@ export class PostgreSQLDatabase {
         });
     }
 
+    public static getActiveSequelize(): Sequelize | null {
+        return PostgreSQLDatabase.activeInstance;
+    }
+
+    public static setActiveSequelize(instance: Sequelize | null): void {
+        PostgreSQLDatabase.activeInstance = instance;
+    }
+
     public getSequelize() {
         return this.sequelize;
     }
@@ -19,6 +27,7 @@ export class PostgreSQLDatabase {
     public async connect() {
         try{
             await this.sequelize.authenticate();
+            PostgreSQLDatabase.activeInstance = this.sequelize;
             await this.sequelize.sync({ alter: true });
 
             console.log("Connected to PostgreSQL");
@@ -28,6 +37,7 @@ export class PostgreSQLDatabase {
 
             return true;
         }catch(error){
+            PostgreSQLDatabase.activeInstance = null;
             throw error;
         }
     }

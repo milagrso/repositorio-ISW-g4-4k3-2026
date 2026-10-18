@@ -32,6 +32,11 @@ TimeSlotModel.init({
         type: DataTypes.INTEGER,
         allowNull: false,
         defaultValue: 0
+    },
+    fecha: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: null
     }
 }, {
     sequelize,

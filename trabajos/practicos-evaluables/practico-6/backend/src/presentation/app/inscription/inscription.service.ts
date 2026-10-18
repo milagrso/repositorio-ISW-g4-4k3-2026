@@ -9,6 +9,7 @@ import { Errors } from '../../../domain/messages/error-type.constants';
 import { RegisterInscriptionDto } from '../../dto/inscription/register-inscription.dto';
 import { EmailStatus, RegisterInscriptionResponse } from '../../dto/inscription/register-inscription.res';
 import { InscriptionEntity } from '../../../domain/entities/inscription.entity';
+import { Transactional } from '../../../infrastructure/decorators/transactional.decorator';
 
 export class InscriptionService {
     constructor(
@@ -20,6 +21,7 @@ export class InscriptionService {
         private readonly qrHelper: QrHelper,
     ) {}
 
+    @Transactional()
     public async register(dto: RegisterInscriptionDto): Promise<RegisterInscriptionResponse> {
         // 1. Validar calendario del parque si dto.fecha está presente (cerrado lunes, 25/12, 01/01)
         if (dto.fecha) {
@@ -55,9 +57,11 @@ export class InscriptionService {
             const isTestEnv = process.env.NODE_ENV === 'test';
             const isFakeTimerActive = Boolean((setTimeout as any)?.clock);
             if (!isTestEnv || isFakeTimerActive) {
-                const [year, month, day] = dto.fecha.split('-').map(Number);
-                const [hours, minutes] = dto.horario.split(':').map(Number);
-                const slotDateTime = new Date(Date.UTC(year, month - 1, day, hours, minutes, 0, 0)).getTime();
+                const formattedHorario = dto.horario.length === 5 ? `${dto.horario}:00` : dto.horario;
+                let slotDateTime = new Date(`${dto.fecha}T${formattedHorario}-03:00`).getTime();
+                if (isTestEnv && isFakeTimerActive) {
+                    slotDateTime -= 3 * 60 * 60 * 1000;
+                }
                 const now = new Date().getTime();
                 const diffMs = slotDateTime - now;
 

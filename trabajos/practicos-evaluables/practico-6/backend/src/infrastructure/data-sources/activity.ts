@@ -1,7 +1,5 @@
-import { Op } from 'sequelize';
 import { ActivityModel } from '../postgresql/models/activity.model';
 import { TimeSlotModel } from '../postgresql/models/time-slot.model';
-import { InscriptionModel } from '../postgresql/models/inscription.model';
 import { ActivityDataSource, ActivityEntity, TimeSlotEntity } from '../../domain';
 
 export class PostgresActivityDataSource implements ActivityDataSource {
@@ -14,22 +12,6 @@ export class PostgresActivityDataSource implements ActivityDataSource {
     private isValidId(id: string | number): boolean {
         const num = Number(id);
         return Number.isInteger(num) && num > 0;
-    }
-
-    private async calculateOccupiedSlots(timeSlotId: number | string, fecha?: string): Promise<number> {
-        if (!fecha) return 0;
-        try {
-            const inscriptions = await InscriptionModel.findAll({
-                where: {
-                    timeSlotId,
-                    fecha,
-                    status: { [Op.ne]: 'CANCELLED' }
-                }
-            });
-            return inscriptions.reduce((sum, insc: any) => sum + (Number(insc.quantity) || 0), 0);
-        } catch {
-            return 0;
-        }
     }
 
     public async findAll(): Promise<ActivityEntity[]> {
@@ -60,63 +42,61 @@ export class PostgresActivityDataSource implements ActivityDataSource {
 
     public async findTimeSlot(activityId: string | number, time: string, fecha?: string): Promise<TimeSlotEntity | null> {
         try {
+            const actId = Number(activityId);
+            const whereClause: Record<string, any> = { activityId: actId, startTime: time };
+            if (fecha) {
+                whereClause.fecha = fecha;
+            }
+
             const slot = await TimeSlotModel.findOne({
-                where: { activityId, startTime: time }
+                where: whereClause,
             });
 
             if (!slot) {
                 return null;
             }
 
-            const data = { ...slot.dataValues };
-            if (fecha) {
-                data.occupiedSlots = await this.calculateOccupiedSlots(slot.dataValues.id, fecha);
-            }
-
-            return TimeSlotEntity.fromObject(data);
+            return TimeSlotEntity.fromObject(slot.dataValues);
         } catch (error) {
             throw error;
         }
     }
 
     public async findAllTimeSlots(fecha?: string): Promise<TimeSlotEntity[]> {
-        const slots = await TimeSlotModel.findAll({ order: [['startTime', 'ASC']] });
-        return Promise.all(
-            slots.map(async (slot) => {
-                const data = { ...slot.dataValues };
-                if (fecha) {
-                    data.occupiedSlots = await this.calculateOccupiedSlots(slot.dataValues.id, fecha);
-                }
-                return TimeSlotEntity.fromObject(data);
-            })
-        );
+        const whereClause: Record<string, any> = {};
+        if (fecha) {
+            whereClause.fecha = fecha;
+        }
+
+        const slots = await TimeSlotModel.findAll({
+            where: whereClause,
+            order: [['fecha', 'ASC'], ['startTime', 'ASC']],
+        });
+
+        return slots.map((slot) => TimeSlotEntity.fromObject(slot.dataValues));
     }
 
-    public async findTimeSlotById(id: string | number, fecha?: string): Promise<TimeSlotEntity | null> {
+    public async findTimeSlotById(id: string | number, _fecha?: string): Promise<TimeSlotEntity | null> {
         if (!this.isValidId(id)) return null;
         const slot = await TimeSlotModel.findByPk(Number(id));
         if (!slot) return null;
-        const data = { ...slot.dataValues };
-        if (fecha) {
-            data.occupiedSlots = await this.calculateOccupiedSlots(slot.dataValues.id, fecha);
-        }
-        return TimeSlotEntity.fromObject(data);
+
+        return TimeSlotEntity.fromObject(slot.dataValues);
     }
 
     public async findTimeSlotsByActivityId(activityId: string | number, fecha?: string): Promise<TimeSlotEntity[]> {
         if (!this.isValidId(activityId)) return [];
+        const actId = Number(activityId);
+        const whereClause: Record<string, any> = { activityId: actId };
+        if (fecha) {
+            whereClause.fecha = fecha;
+        }
+
         const slots = await TimeSlotModel.findAll({
-            where: { activityId: Number(activityId) },
-            order: [['startTime', 'ASC']]
+            where: whereClause,
+            order: [['fecha', 'ASC'], ['startTime', 'ASC']],
         });
-        return Promise.all(
-            slots.map(async (slot) => {
-                const data = { ...slot.dataValues };
-                if (fecha) {
-                    data.occupiedSlots = await this.calculateOccupiedSlots(slot.dataValues.id, fecha);
-                }
-                return TimeSlotEntity.fromObject(data);
-            })
-        );
+
+        return slots.map((slot) => TimeSlotEntity.fromObject(slot.dataValues));
     }
 }

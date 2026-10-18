@@ -1,4 +1,4 @@
-import { Op } from 'sequelize';
+import { Op, Sequelize } from 'sequelize';
 import { InscriptionModel } from '../postgresql/models/inscription.model';
 import { TimeSlotModel } from '../postgresql/models/time-slot.model';
 import { InscriptionDataSource, InscriptionEntity } from '../../domain';
@@ -57,37 +57,29 @@ export class PostgresInscriptionDataSource implements InscriptionDataSource {
         return null;
     }
 
-    public async reserveSlots(timeSlotId: string | number, quantity: number, fecha?: string): Promise<boolean> {
+    public async reserveSlots(timeSlotId: string | number, quantity: number): Promise<boolean> {
         try {
-            const slot = await TimeSlotModel.findByPk(timeSlotId);
+            const qty = Number(quantity);
+            const slotId = Number(timeSlotId);
 
-            if (!slot) {
+            if (!Number.isInteger(qty) || qty <= 0) {
+                return false;
+            }
+            if (!Number.isInteger(slotId) || slotId <= 0) {
                 return false;
             }
 
-            const { maxCapacity, occupiedSlots } = slot.dataValues;
-
-            if (fecha) {
-                const inscriptions = await InscriptionModel.findAll({
+            const [affectedCount] = await TimeSlotModel.update(
+                { occupiedSlots: Sequelize.literal(`"occupiedSlots" + ${qty}`) },
+                {
                     where: {
-                        timeSlotId,
-                        fecha,
-                        status: { [Op.ne]: 'CANCELLED' }
-                    }
-                });
-                const occupiedOnDate = inscriptions.reduce((sum, insc: any) => sum + (Number(insc.quantity) || 0), 0);
-                if (maxCapacity - occupiedOnDate < quantity) {
-                    return false;
+                        id: slotId,
+                        occupiedSlots: { [Op.lte]: Sequelize.literal(`"maxCapacity" - ${qty}`) }
+                    },
                 }
-                return true;
-            }
+            );
 
-            if (maxCapacity - occupiedSlots < quantity) {
-                return false;
-            }
-
-            await slot.update({ occupiedSlots: occupiedSlots + quantity });
-            return true;
+            return affectedCount > 0;
         } catch (error) {
             throw error;
         }
