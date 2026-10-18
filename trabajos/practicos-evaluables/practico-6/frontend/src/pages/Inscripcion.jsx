@@ -510,6 +510,7 @@ export default function Inscripcion() {
                 <PeopleSky ids={form.visitors.slice(0, visitorCount).map((visitor) => visitor.id)} />
                 <p className="text-base-content/60 text-sm">
                   Los campos con <span className="text-error">*</span> son obligatorios.
+                  {activity?.minAge ? ` ${activity.name}: desde ${activity.minAge} años.` : ''}
                 </p>
                 <div className="flex items-center justify-between gap-3">
                   <span className="label-text">

@@ -209,6 +209,9 @@ export function validateInscription(form, activity, options = {}) {
     } else {
       const age = Number(visitor.edad)
       if (age < 1 || age > 120) item.edad = 'La edad tiene que estar entre 1 y 120.'
+      else if (activity?.minAge && age < activity.minAge) {
+        item.edad = 'La edad ingresada es menor a la edad mínima establecida para esta actividad.'
+      }
     }
 
     if (activity?.requiresSize) {

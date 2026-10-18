@@ -92,9 +92,16 @@ export default function Home() {
                 <div className="absolute right-3 bottom-3 left-3 text-white">
                   <div className="mb-1 flex items-center justify-between gap-2">
                     <h2 className="font-display text-2xl font-semibold">{activity.name}</h2>
-                    <span className="badge badge-sm border-white/30 bg-white/15 text-white">
-                      {activity.requiresSize ? 'Pide talle' : 'Sin talle'}
-                    </span>
+                    <div className="flex shrink-0 gap-1">
+                      {activity.minAge ? (
+                        <span className="badge badge-sm border-white/30 bg-white/15 text-white">
+                          Desde {activity.minAge} años
+                        </span>
+                      ) : null}
+                      <span className="badge badge-sm border-white/30 bg-white/15 text-white">
+                        {activity.requiresSize ? 'Pide talle' : 'Sin talle'}
+                      </span>
+                    </div>
                   </div>
                   <p className="text-sm text-white/85">{activity.summary}</p>
                 </div>
