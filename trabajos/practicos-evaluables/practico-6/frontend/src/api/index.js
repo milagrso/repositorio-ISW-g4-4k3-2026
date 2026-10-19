@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { request } from './client.js'
 import { ApiError } from './errors.js'
 import { activityRecords, findActivity, parkRecord, slotsForDate, toActivity } from '../data/catalog.js'
@@ -29,6 +29,30 @@ export function useSlots(activityId, date) {
     status: activityId && date ? 'ready' : 'idle',
     retry() {},
   }
+}
+
+export function useSession() {
+  const [user, setUser] = useState(null)
+  const [status, setStatus] = useState('loading')
+
+  useEffect(() => {
+    let cancelled = false
+    request('/api/catalog/session')
+      .then((data) => {
+        if (cancelled) return
+        setUser(data)
+        setStatus('ready')
+      })
+      .catch(() => {
+        if (cancelled) return
+        setStatus('error')
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  return { user, status }
 }
 
 export function createInscription(input) {

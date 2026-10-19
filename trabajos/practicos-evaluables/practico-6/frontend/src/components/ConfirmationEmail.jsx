@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import QRCode from 'qrcode'
-import { Link } from 'wouter'
 import { motion, useReducedMotion } from 'motion/react'
 import { Mail, Paperclip } from 'lucide-react'
 import { formatParkDateTime } from '../lib/clock.js'
@@ -60,7 +59,7 @@ function useVisitorQrs(registration) {
   return { qrs, failed }
 }
 
-export default function ConfirmationEmail({ registration, onReset }) {
+export default function ConfirmationEmail({ registration }) {
   const reduce = useReducedMotion()
   const { qrs, failed } = useVisitorQrs(registration)
   const sentAt = registration.sentAt != null ? formatParkDateTime(registration.sentAt) : null
@@ -87,10 +86,10 @@ export default function ConfirmationEmail({ registration, onReset }) {
           <span>{registration.message || 'La inscripción quedó registrada, pero no se pudo enviar el correo.'}</span>
         </div>
       ) : (
-        <div className="alert alert-success items-start text-sm">
+        <div className="alert alert-success items-start">
           <Mail className="size-5 shrink-0" />
           <span>
-            {registration.message || `Inscripción confirmada. El correo de confirmación es para ${registration.email}.`}
+            Revisá tu correo <strong className="break-all">{registration.email}</strong>. Ahí te llegó la entrada.
           </span>
         </div>
       )}
@@ -188,14 +187,6 @@ export default function ConfirmationEmail({ registration, onReset }) {
         </div>
       </article>
 
-      <div className="grid gap-2">
-        <button type="button" className="btn btn-primary btn-block" onClick={onReset}>
-          Nueva inscripción
-        </button>
-        <Link href="/" className="btn btn-outline btn-block">
-          Volver al inicio
-        </Link>
-      </div>
     </motion.section>
   )
 }

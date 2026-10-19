@@ -1,24 +1,27 @@
 import { useState } from 'react'
 import { Link, useLocation } from 'wouter'
 import { AnimatePresence, motion } from 'motion/react'
-import { usePark } from '../api/index.js'
+import { usePark, useSession } from '../api/index.js'
+import Avatar from './Avatar.jsx'
 import { DockContext } from './dock-context.js'
 
 export default function Layout({ children }) {
   const [location] = useLocation()
   const [dock, setDock] = useState(null)
   const { park } = usePark()
+  const { user } = useSession()
 
   return (
     <DockContext.Provider value={setDock}>
     <div className="eco-app min-h-dvh">
       <div className="mx-auto flex min-h-dvh w-full max-w-md flex-col">
         <header className="sticky top-0 z-20 px-4 pt-[max(0.75rem,env(safe-area-inset-top))] pb-3">
-          <div className="border-base-300/80 bg-base-100/80 flex items-center rounded-full border px-4 py-2 shadow-[0_10px_30px_-18px_oklch(25%_0.04_155/0.7)] backdrop-blur-md">
-            <Link href="/" className="font-display flex min-w-0 items-center gap-2 text-lg font-black tracking-tight">
+          <div className="border-base-300/80 bg-base-100/80 flex items-center gap-2 rounded-full border py-2 pr-2 pl-4 shadow-[0_10px_30px_-18px_oklch(25%_0.04_155/0.7)] backdrop-blur-md">
+            <Link href="/" className="font-display flex min-w-0 flex-1 items-center gap-2 text-lg font-black tracking-tight">
               <img src="/logo/icono.svg" alt="" className="size-8 shrink-0" />
               <span className="truncate">{park?.name ?? 'EcoHarmony Park'}</span>
             </Link>
+            <Avatar user={user} />
           </div>
         </header>
 
@@ -45,14 +48,14 @@ export default function Layout({ children }) {
                   className="text-neutral-content/80 flex min-h-12 w-full cursor-pointer items-center justify-center rounded-full text-sm font-medium"
                   onClick={dock.onBack}
                 >
-                  Atrás
+                  {dock.backLabel ?? 'Atrás'}
                 </button>
               </li>
               <li className="relative">
-                <span className="bg-primary absolute inset-0 rounded-full" />
+                <span className="bg-secondary absolute inset-0 rounded-full" />
                 <button
                   type="button"
-                  className="text-primary-content relative z-10 flex min-h-12 w-full cursor-pointer items-center justify-center rounded-full text-sm font-semibold"
+                  className="text-secondary-content relative z-10 flex min-h-12 w-full cursor-pointer items-center justify-center rounded-full text-sm font-semibold"
                   onClick={dock.onNext}
                 >
                   {dock.label}

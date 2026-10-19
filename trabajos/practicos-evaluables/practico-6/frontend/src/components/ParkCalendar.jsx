@@ -1,49 +1,77 @@
-import { DayPicker } from 'react-day-picker'
-import { es } from 'react-day-picker/locale/es'
-import 'react-day-picker/style.css'
 import { addDays } from '../lib/clock.js'
-import { closedHolidaysInMonth } from '../lib/holidays.js'
-import { formatDayMonth, parseISODate, todayISO, toISODate } from '../lib/inscription.js'
+import { closedHolidays } from '../lib/holidays.js'
+import { isClosedWeekday, parseISODate, todayISO } from '../lib/inscription.js'
+
+function dayParts(dateStr) {
+  const date = parseISODate(dateStr)
+  return {
+    weekday: date.toLocaleDateString('es-AR', { weekday: 'long' }),
+    day: date.getDate(),
+    month: date.toLocaleDateString('es-AR', { month: 'long' }),
+  }
+}
+
+function closedNote(date, closedWeekdays) {
+  if (isClosedWeekday(date, closedWeekdays)) return 'Cerrado'
+  const holiday = closedHolidays.find((item) => date.endsWith(`-${item.monthDay}`))
+  return holiday ? holiday.nombre : null
+}
 
 export default function ParkCalendar({
   value,
   onChange,
-  month,
-  onMonthChange,
   now,
   status,
   onRetry,
   reservable,
+  closedWeekdays = [1],
   invalid,
 }) {
   const ready = status === 'ready' && now != null
-  const today = ready ? parseISODate(todayISO(now)) : undefined
-  const tomorrow = ready ? parseISODate(addDays(todayISO(now), 1)) : undefined
-  const selected = value ? parseISODate(value) : undefined
-  const monthHolidays = ready
-    ? closedHolidaysInMonth(month.getFullYear(), month.getMonth()).filter((item) => item.fecha >= todayISO(now))
+  const today = ready ? todayISO(now) : null
+  const days = ready
+    ? [
+        { date: today, label: 'Hoy' },
+        { date: addDays(today, 1), label: 'Mañana' },
+      ]
     : []
 
   return (
     <div className="grid gap-3">
       {ready ? (
-        <DayPicker
-          mode="single"
-          locale={es}
-          weekStartsOn={1}
-          className={`park-calendar ${invalid ? 'park-calendar-invalid' : ''}`}
-          month={month}
-          onMonthChange={onMonthChange}
-          startMonth={today}
-          endMonth={tomorrow}
-          today={today}
-          selected={selected}
-          onSelect={(date) => {
-            if (!date) return
-            onChange(toISODate(date))
-          }}
-          disabled={(date) => !reservable.has(toISODate(date))}
-        />
+        <div
+          className={`grid grid-cols-2 gap-2 ${invalid ? 'park-calendar-invalid' : ''}`}
+          role="radiogroup"
+          aria-label="Día de la visita"
+        >
+          {days.map((item) => {
+            const parts = dayParts(item.date)
+            const closed = closedNote(item.date, closedWeekdays)
+            const open = reservable.has(item.date)
+            const selected = value === item.date
+            const note = closed ?? (open ? null : item.date === today ? 'Sin turnos abiertos' : 'Todavía no abre')
+
+            return (
+              <button
+                key={item.date}
+                type="button"
+                role="radio"
+                aria-checked={selected}
+                disabled={!open}
+                className={`btn h-auto min-h-32 flex-col gap-0.5 py-3 ${
+                  open ? 'cursor-pointer' : 'cursor-not-allowed'
+                } ${selected ? 'btn-primary' : 'btn-outline'}`}
+                onClick={() => onChange(item.date)}
+              >
+                <span className="text-xs font-bold tracking-[0.14em] uppercase">{item.label}</span>
+                <span className="font-display text-3xl leading-none font-black">{parts.day}</span>
+                <span className="text-sm capitalize">{parts.weekday}</span>
+                <span className="text-xs capitalize opacity-80">{parts.month}</span>
+                {note ? <span className="mt-1 text-xs font-semibold">{note}</span> : null}
+              </button>
+            )
+          })}
+        </div>
       ) : null}
 
       {status === 'loading' ? <p className="text-base-content/70 text-sm">Consultando la hora del parque…</p> : null}
@@ -62,17 +90,6 @@ export default function ParkCalendar({
           Podés inscribirte desde 24 horas antes del turno hasta 15 minutos antes de que empiece. Los lunes, el 25 de
           diciembre y el 1 de enero el parque está cerrado.
         </p>
-      ) : null}
-
-      {monthHolidays.length > 0 ? (
-        <ul className="grid gap-1 text-sm">
-          {monthHolidays.map((item) => (
-            <li key={item.fecha} className="text-base-content/80">
-              <span className="capitalize">{formatDayMonth(item.fecha)}</span>
-              {` · ${item.nombre}`}
-            </li>
-          ))}
-        </ul>
       ) : null}
     </div>
   )

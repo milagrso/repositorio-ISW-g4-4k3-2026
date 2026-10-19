@@ -90,6 +90,12 @@ export function bookingState(dateStr, time, now) {
   return null
 }
 
+// Se puede reservar con exactamente 24 h de anticipación y hasta exactamente 15 min antes.
+export function canBook(dateStr, time, now) {
+  if (now == null || !dateStr || !time) return false
+  return bookingState(dateStr, time, now) == null
+}
+
 export const bookingMessages = {
   early: 'Solo se permiten inscripciones dentro de las 24 horas previas al inicio del turno.',
   late: 'Las inscripciones cierran 15 minutos antes del inicio del turno.',

@@ -1,7 +1,7 @@
 import { ApiError } from './errors.js'
 
 // El backend escucha en este origen. Se puede cambiar con VITE_API_URL.
-const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:3000').replace(/\/$/, '')
+const baseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:4040').replace(/\/$/, '')
 
 export async function request(path, options = {}) {
   let response

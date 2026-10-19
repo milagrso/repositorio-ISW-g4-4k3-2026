@@ -3,7 +3,8 @@ import { isClosedHoliday } from './holidays.js'
 
 export const NAME_MAX = 60
 export const DNI_MAX = 8
-export const AGE_MAX = 3
+export const MAX_AGE = 99
+export const AGE_MAX = 2
 export const CLOTH_SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
 
 const namePattern = /^[\p{L}]+(?: \p{L}+)*$/u
@@ -204,13 +205,14 @@ export function validateInscription(form, activity, options = {}) {
       item.dni = 'El DNI debe tener 7 u 8 números.'
     }
 
-    if (!/^\d{1,3}$/.test(visitor.edad)) {
+    if (!/^\d{1,2}$/.test(visitor.edad)) {
       item.edad = 'Ingresá la edad solo con números.'
     } else {
       const age = Number(visitor.edad)
-      if (age < 1 || age > 120) item.edad = 'La edad tiene que estar entre 1 y 120.'
+      if (age < 1) item.edad = 'La edad tiene que ser mayor a 0.'
+      else if (age > MAX_AGE) item.edad = `La edad máxima para las actividades es de ${MAX_AGE} años.`
       else if (activity?.minAge && age < activity.minAge) {
-        item.edad = 'La edad ingresada es menor a la edad mínima establecida para esta actividad.'
+        item.edad = `La edad mínima para esta actividad es de ${activity.minAge} años.`
       }
     }
 

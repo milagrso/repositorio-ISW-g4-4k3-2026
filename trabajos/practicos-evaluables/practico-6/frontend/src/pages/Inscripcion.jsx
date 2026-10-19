@@ -9,22 +9,20 @@ import {
   DNI_MAX,
   NAME_MAX,
   emptyVisitor,
-  errorList,
   formatDate,
   formatDayMonth,
   pruneErrors,
   sanitizeDigits,
   sanitizeName,
   slotCapacity,
-  slotLabel,
   reservableDates,
   slotProblem,
-  todayDate,
   validateInscription,
   validateStep,
 } from '../lib/inscription.js'
 import { useParkClock } from '../lib/clock.js'
 import ConfirmationEmail from '../components/ConfirmationEmail.jsx'
+import HourClock from '../components/HourClock.jsx'
 import ParkCalendar from '../components/ParkCalendar.jsx'
 import PeopleSky from '../components/PeopleSky.jsx'
 import { useSetDock } from '../components/dock-context.js'
@@ -38,7 +36,7 @@ const STEPS = [
 const STEP_COPY = [
   {
     title: 'Elegí fecha y horario',
-    text: 'Primero elegí el día. Los horarios disponibles dependen de esa fecha.',
+    text: 'Elegí hoy o mañana. Los horarios disponibles dependen de ese día.',
   },
   {
     title: 'Datos de los visitantes',
@@ -52,7 +50,11 @@ const STEP_COPY = [
 
 function FieldError({ message, className = '' }) {
   if (!message) return null
-  return <p className={`text-error text-sm ${className}`}>{message}</p>
+  return (
+    <p data-field-error="" className={`text-error text-sm ${className}`}>
+      {message}
+    </p>
+  )
 }
 
 function RequiredMark() {
@@ -133,7 +135,6 @@ export default function Inscripcion() {
 
   const reduce = useReducedMotion()
   const clock = useParkClock()
-  const [calendarMonth, setCalendarMonth] = useState(null)
   const { slots, status: slotsStatus, retry: retrySlots } = useSlots(activity?.id, form.date)
   // El tope de personas es el cupo del horario elegido. Sin horario todavía, no hay tope.
   const peopleLimit = slotCapacity(slots, form.time)
@@ -157,10 +158,6 @@ export default function Inscripcion() {
     form.date && form.time && slotsStatus === 'ready'
       ? slotProblem(slots, form.date, form.time, form.people, closedWeekdays, clock.now)
       : null
-  const messages = useMemo(
-    () => errorList(errors).filter((message) => message !== scheduleMessage),
-    [errors, scheduleMessage],
-  )
   const copy = STEP_COPY[step]
 
   useEffect(() => {
@@ -170,6 +167,14 @@ export default function Inscripcion() {
 
   function scrollTop() {
     window.scrollTo({ top: 0, behavior: reduce ? 'auto' : 'smooth' })
+  }
+
+  function scrollToError() {
+    window.setTimeout(() => {
+      const error = document.querySelector('[data-field-error]')
+      if (!error) return
+      error.scrollIntoView({ behavior: reduce ? 'auto' : 'smooth', block: 'center' })
+    }, 50)
   }
 
   // Aplica el cambio y saca los errores ya mostrados que el cambio corrigió.
@@ -219,7 +224,7 @@ export default function Inscripcion() {
           setErrors(stepErrors)
           setDirection(1)
           setStep(index)
-          scrollTop()
+          scrollToError()
           return
         }
       }
@@ -234,7 +239,7 @@ export default function Inscripcion() {
     const stepErrors = validateStep(STEPS[step].key, form, activity, rules)
     if (Object.keys(stepErrors).length > 0) {
       setErrors(stepErrors)
-      scrollTop()
+      scrollToError()
       return
     }
     setErrors({})
@@ -253,7 +258,7 @@ export default function Inscripcion() {
           : 2
     setDirection(target > step ? 1 : -1)
     setStep(target)
-    scrollTop()
+    scrollToError()
   }
 
   async function submit(event) {
@@ -342,11 +347,22 @@ export default function Inscripcion() {
     if (step < STEPS.length - 1) nextStep()
     else submit({ preventDefault() {} })
   }
+  dockActions.current.reset = reset
 
   useEffect(() => {
     if (!setDock) return undefined
-    if (confirmation || !activity) {
+    if (!activity) {
       setDock(null)
+      return () => setDock(null)
+    }
+
+    if (confirmation) {
+      setDock({
+        backLabel: 'Inicio',
+        label: 'Nueva inscripción',
+        onBack: () => navigate('/'),
+        onNext: () => dockActions.current.reset(),
+      })
       return () => setDock(null)
     }
 
@@ -356,10 +372,10 @@ export default function Inscripcion() {
       onNext: () => dockActions.current.next(),
     })
     return () => setDock(null)
-  }, [activity, confirmation, setDock, step, submitting])
+  }, [activity, confirmation, navigate, setDock, step, submitting])
 
   if (confirmation) {
-    return <ConfirmationEmail registration={confirmation} onReset={reset} />
+    return <ConfirmationEmail registration={confirmation} />
   }
 
   if (!activity) {
@@ -413,16 +429,6 @@ export default function Inscripcion() {
           transition={{ duration: 0.28 }}
           className="space-y-4"
         >
-          {messages.length > 0 ? (
-            <div className="alert alert-error items-start text-sm">
-              <ul className="list-disc pl-4">
-                {messages.map((message, index) => (
-                  <li key={`${message}-${index}`}>{message}</li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
-
           {step === 0 ? (
             <section className="card bg-base-100 shadow-sm">
               <div className="card-body gap-4 p-4">
@@ -430,12 +436,11 @@ export default function Inscripcion() {
                   <span className="label-text">Fecha</span>
                   <ParkCalendar
                     value={form.date}
-                    month={calendarMonth ?? (clock.now != null ? todayDate(clock.now) : null)}
-                    onMonthChange={setCalendarMonth}
                     now={clock.now}
                     status={clock.status}
                     onRetry={clock.retry}
                     reservable={reservable}
+                    closedWeekdays={closedWeekdays}
                     invalid={Boolean(errors.date)}
                     onChange={(date) => {
                       setErrors({})
@@ -460,24 +465,19 @@ export default function Inscripcion() {
                       </button>
                     </div>
                   ) : null}
-                  {form.date && slotsStatus === 'ready'
-                    ? slots.map((slot) => (
-                        <button
-                          key={slot.time}
-                          type="button"
-                          className={`btn h-auto min-h-12 w-full cursor-pointer justify-between py-3 ${
-                            form.time === slot.time ? 'btn-primary' : 'btn-outline'
-                          }`}
-                          onClick={() => {
-                            setErrors({})
-                            setForm((current) => ({ ...current, time: slot.time }))
-                          }}
-                        >
-                          {slot.time}
-                          <span className="badge badge-sm">{slotLabel(slot, form.date, clock.now)}</span>
-                        </button>
-                      ))
-                    : null}
+                  {form.date && slotsStatus === 'ready' ? (
+                    <HourClock
+                      slots={slots}
+                      value={form.time}
+                      date={form.date}
+                      now={clock.now}
+                      invalid={Boolean(errors.time)}
+                      onChange={(time) => {
+                        setErrors({})
+                        setForm((current) => ({ ...current, time }))
+                      }}
+                    />
+                  ) : null}
                   {form.date ? null : (
                     <p className="bg-base-200 text-base-content/70 rounded-2xl px-4 py-3 text-sm">
                       Elegí un día para ver los horarios de esa fecha.
@@ -729,6 +729,7 @@ export default function Inscripcion() {
                   <span className="align-middle">Acepto los términos y condiciones de la actividad.</span>
                 </label>
                 <FieldError message={errors.terms} className="text-center" />
+                <FieldError message={errors.submit} className="text-center" />
               </div>
             </section>
           ) : null}
