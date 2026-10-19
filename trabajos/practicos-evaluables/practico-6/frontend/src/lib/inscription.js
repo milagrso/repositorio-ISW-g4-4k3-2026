@@ -191,6 +191,7 @@ export function validateInscription(form, activity, options = {}) {
   }
 
   const count = Number.isInteger(people) && people > 0 ? people : 0
+  const seenDni = new Set()
   const visitorErrors = Array.from({ length: count }, (_, index) => {
     const visitor = form.visitors[index] ?? emptyVisitor()
     const item = {}
@@ -203,6 +204,10 @@ export function validateInscription(form, activity, options = {}) {
 
     if (!/^\d{7,8}$/.test(visitor.dni)) {
       item.dni = 'El DNI debe tener 7 u 8 números.'
+    } else if (seenDni.has(visitor.dni)) {
+      item.dni = 'Este DNI ya está cargado en otra persona.'
+    } else {
+      seenDni.add(visitor.dni)
     }
 
     if (!/^\d{1,2}$/.test(visitor.edad)) {
