@@ -8,6 +8,7 @@ skinparam shadowing false
 package "Modelos de Base de Datos" {
     class ActivityModel {
         + id: number [PK]
+        + parkId: number [FK]
         + name: string
         + enabled: boolean
         + cloth: object?
@@ -56,7 +57,30 @@ package "Modelos de Base de Datos" {
     }
 }
 
+package "Clases de Dominio (No Entidades BDD)" {
+    class ParticipantEntity <<Domain Class>> {
+        + nombre: string
+        + dni: number
+        + edad: number
+        + talleCalzado: number?
+        + talleVestimenta: string?
+        + meetsMinAge(minAge: number): boolean
+        + hasValidClothSize(cloth: ClothEntity): boolean
+        + {static} fromObject(object: any): ParticipantEntity
+    }
+
+    class ClothEntity <<Value Object>> {
+        + tipo: string
+        + tallesValidos: string[]?
+        + isValidSize(size: any): boolean
+        + {static} fromObject(object: any): ClothEntity
+    }
+}
+
+ParkModel "1" *-- "1..*" ActivityModel : posee >
 ActivityModel "1" *-- "0..*" TimeSlotModel
 ActivityModel "1" *-- "0..*" InscriptionModel
 TimeSlotModel "1" *-- "0..*" InscriptionModel
+InscriptionModel "1" *-- "1..*" ParticipantEntity : contiene (JSON) >
+ActivityModel ..> ClothEntity : configura (JSON) >
 @enduml

@@ -16,6 +16,7 @@ entity "parks" as parks {
 entity "activities" as activities {
     * id : number <<PK>>
     --
+    * parkId : number <<FK>>
     * name : string
     * enabled : boolean
     cloth : object [null]
@@ -58,6 +59,7 @@ entity "inscriptions" as inscriptions {
     * createdAt : date
 }
 
+parks ||--o{ activities : "1..*"
 activities ||--o{ time_slots : "1..*"
 activities ||--o{ inscriptions : "0..*"
 time_slots ||--o{ inscriptions : "0..*"
