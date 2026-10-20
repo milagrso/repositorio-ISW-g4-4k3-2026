@@ -96,10 +96,12 @@ export class EmailHelper {
                 const label = participant?.nombre
                     ? `${participant.nombre} (DNI: ${participant.dni})`
                     : `Visitante ${index + 1}`;
+                const isLast = index === qrList.length - 1;
+                const bottomMargin = isLast ? '0' : '22px';
                 return `
-                    <div style="display: inline-block; margin: 10px; text-align: center; vertical-align: top;">
-                        <p style="margin: 0 0 6px 0; font-size: 13px; font-weight: 700; color: #386641;">${label}</p>
-                        <img src="${src}" alt="Código QR ${label}" width="160" height="160" style="display: block; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 4px; max-width: 100%; height: auto;" />
+                    <div style="margin: 0 auto ${bottomMargin} auto; text-align: center; max-width: 240px;">
+                        <p style="margin: 0 0 8px 0; font-size: 14px; font-weight: 700; color: #386641;">${label}</p>
+                        <img src="${src}" alt="Código QR ${label}" width="180" height="180" style="display: block; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 4px; max-width: 100%; height: auto;" />
                     </div>`;
             }).join('');
 
