@@ -610,6 +610,12 @@ describe('Pruebas unitarias para el InscriptionService', () => {
             // Assert
             expect(result.status).toBe('EXITOSA');
             expect(emailHelperMock.sendInscriptionConfirmation).toHaveBeenCalledTimes(1);
+            expect(emailHelperMock.sendInscriptionConfirmation).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    to: 'usuario@ejemplo.com',
+                    qrCodes: ['qr-data-string'],
+                })
+            );
         });
     });
 
@@ -666,7 +672,9 @@ describe('Pruebas unitarias para el InscriptionService', () => {
             const slot = createTimeSlotFixture({ id: 10, startTime: '10:00', maxCapacity: 10, occupiedSlots: 5 });
             activityRepositoryMock.findByName.mockResolvedValue(activity);
             activityRepositoryMock.findTimeSlot.mockResolvedValue(slot);
-            qrHelperMock.generate.mockResolvedValue('qr-token-123');
+            qrHelperMock.generate
+                .mockResolvedValueOnce('qr-token-juan')
+                .mockResolvedValueOnce('qr-token-maria');
 
             const dto = new RegisterInscriptionDto(createRegisterInscriptionRawFixture({
                 actividad: 'Tirolesa',
@@ -689,7 +697,7 @@ describe('Pruebas unitarias para el InscriptionService', () => {
                     activityName: 'Tirolesa',
                     timeSlot: '10:00',
                     quantity: 2,
-                    qrCode: 'qr-token-123',
+                    qrCodes: ['qr-token-juan', 'qr-token-maria'],
                     participants: expect.arrayContaining([
                         expect.objectContaining({ nombre: 'Juan', dni: 30784219 }),
                         expect.objectContaining({ nombre: 'María', dni: 44123456 }),
