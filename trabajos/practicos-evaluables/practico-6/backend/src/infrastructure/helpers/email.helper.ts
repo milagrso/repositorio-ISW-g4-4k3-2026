@@ -11,7 +11,7 @@ export interface EmailInscriptionConfirmationData {
     activityName: string;
     timeSlot: string;
     quantity: number;
-    qrCode: string;
+    qrCodes: string[];
     fecha?: string;
     numeroInscripcion?: string;
     participants: Array<{
@@ -54,12 +54,30 @@ export class EmailHelper {
         return templatePath;
     }
 
+    private async getQrBuffer(qr: string): Promise<Buffer> {
+        if (!qr) {
+            return Buffer.from('');
+        }
+        if (qr.startsWith('data:image/')) {
+            const base64Data = qr.replace(/^data:image\/\w+;base64,/, '');
+            return Buffer.from(base64Data, 'base64');
+        }
+        try {
+            return await QRCode.toBuffer(qr, {
+                errorCorrectionLevel: 'M',
+                margin: 2,
+            });
+        } catch {
+            return Buffer.from(qr);
+        }
+    }
+
     public buildHtmlTemplate(
         data: EmailInscriptionConfirmationData,
         options?: { embedCid?: boolean }
     ): string {
         const embedCid = options?.embedCid ?? true;
-        const qrSrc = embedCid ? 'cid:qrcode-ticket' : (data.qrCode || 'cid:qrcode-ticket');
+        const qrList = data.qrCodes || [];
 
         const participantsSummary = (data.participants || [])
             .map((p) => {
@@ -69,18 +87,44 @@ export class EmailHelper {
             })
             .join('\n');
 
+        let qrContentHtml: string;
+        if (qrList.length > 1) {
+            const cards = qrList.map((qr, index) => {
+                const cid = `qrcode-ticket-${index + 1}`;
+                const src = embedCid ? `cid:${cid}` : (qr || `cid:${cid}`);
+                const participant = data.participants?.[index];
+                const label = participant?.nombre
+                    ? `${participant.nombre} (DNI: ${participant.dni})`
+                    : `Visitante ${index + 1}`;
+                return `
+                    <div style="display: inline-block; margin: 10px; text-align: center; vertical-align: top;">
+                        <p style="margin: 0 0 6px 0; font-size: 13px; font-weight: 700; color: #386641;">${label}</p>
+                        <img src="${src}" alt="Código QR ${label}" width="160" height="160" style="display: block; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 4px; max-width: 100%; height: auto;" />
+                    </div>`;
+            }).join('');
+
+            qrContentHtml = `<div style="text-align: center;">${cards}</div>`;
+        } else {
+            const singleQr = qrList[0];
+            const qrSrc = embedCid ? 'cid:qrcode-ticket' : (singleQr || 'cid:qrcode-ticket');
+            qrContentHtml = `<img src="${qrSrc}" alt="Código QR de la reserva" width="180" height="180" style="display: block; margin: 0 auto; border: 1px solid #e0e0e0; border-radius: 4px; max-width: 100%; height: auto;" />`;
+        }
+
         const params = [
             data.numeroInscripcion ? `N° ${data.numeroInscripcion}` : 'Reserva Confirmada',
             data.activityName,
             data.fecha ?? '-',
             data.timeSlot,
             String(data.quantity),
-            qrSrc,
+            qrContentHtml,
             participantsSummary,
         ];
 
         const templatePath = this.getTemplatePath();
         let html = fs.readFileSync(templatePath, 'utf-8');
+
+        // Handle legacy template containing <img src="$6" ... /> defensively
+        html = html.replace(/<img[^>]*src="\$6"[^>]*\/>/g, '$6');
 
         params.forEach((value, index) => {
             html = html.replace(`$${index + 1}`, value);
@@ -95,29 +139,28 @@ export class EmailHelper {
         }
 
         const html = this.buildHtmlTemplate(data, { embedCid: true });
+        const qrList = data.qrCodes || [];
         const attachments: Array<{ filename: string; content: Buffer; cid?: string }> = [];
 
-        if (data.qrCode) {
-            let qrBuffer: Buffer;
-            if (data.qrCode.startsWith('data:image/')) {
-                const base64Data = data.qrCode.replace(/^data:image\/\w+;base64,/, '');
-                qrBuffer = Buffer.from(base64Data, 'base64');
-            } else {
-                try {
-                    qrBuffer = await QRCode.toBuffer(data.qrCode, {
-                        errorCorrectionLevel: 'M',
-                        margin: 2,
-                    });
-                } catch {
-                    qrBuffer = Buffer.from(data.qrCode);
-                }
-            }
-
+        if (qrList.length === 1) {
+            const qrBuffer = await this.getQrBuffer(qrList[0]);
             attachments.push({
                 filename: 'ticket-qr.png',
                 content: qrBuffer,
                 cid: 'qrcode-ticket',
             });
+        } else if (qrList.length > 1) {
+            for (let i = 0; i < qrList.length; i++) {
+                const qrItem = qrList[i];
+                const qrBuffer = await this.getQrBuffer(qrItem);
+                const participant = data.participants?.[i];
+                const fileSuffix = participant?.dni ? `-${participant.dni}` : `-${i + 1}`;
+                attachments.push({
+                    filename: `ticket-qr${fileSuffix}.png`,
+                    content: qrBuffer,
+                    cid: `qrcode-ticket-${i + 1}`,
+                });
+            }
         }
 
         await this.transporter.sendMail({

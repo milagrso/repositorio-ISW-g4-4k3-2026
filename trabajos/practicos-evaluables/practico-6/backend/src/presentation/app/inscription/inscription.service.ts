@@ -156,7 +156,7 @@ export class InscriptionService {
             })
         );
 
-        const qrCode = participantesWithQr[0]?.qr ?? '';
+        const qrCodes = participantesWithQr.map((p) => p.qr);
 
         // 13. Enviar correo de confirmación (I/O externo fuera de la transacción DB)
         let emailFailed = false;
@@ -166,7 +166,7 @@ export class InscriptionService {
                 activityName: activity.name,
                 timeSlot: dto.horario,
                 quantity: dto.cantidad,
-                qrCode,
+                qrCodes,
                 fecha: dto.fecha,
                 numeroInscripcion,
                 participants: dto.participantes,
