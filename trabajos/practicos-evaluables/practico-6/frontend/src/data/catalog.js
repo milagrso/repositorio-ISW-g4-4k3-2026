@@ -4,8 +4,17 @@ function slot(time, capacity, status = 'open') {
 
 // Un turno por hora de 09:00 a 17:00 (a las 18:00 no hay turno), todos los días que abre
 // el parque: de martes a domingo. El cupo es el mismo en cada turno.
-const PARK_TIMES = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00']
+export const PARK_TIMES = ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00']
 const OPEN_WEEKDAYS = [0, 2, 3, 4, 5, 6]
+
+export function toSlug(value) {
+  return String(value ?? '')
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .trim()
+    .replace(/\s+/g, '-')
+}
 
 function everyOpenDay(capacity) {
   const slots = PARK_TIMES.map((time) => slot(time, capacity))
@@ -82,8 +91,27 @@ export const activityRecords = [
   },
 ]
 
-export function findActivity(id) {
-  return activityRecords.find((activity) => activity.id === id) ?? null
+export function findActivity(idOrName) {
+  if (idOrName == null) return null
+  const slug = toSlug(idOrName)
+  return activityRecords.find((activity) => activity.id === slug || toSlug(activity.name) === slug) ?? null
+}
+
+export function mapBackendActivity(backendActivity) {
+  const slug = toSlug(backendActivity.name)
+  const catalogActivity = findActivity(slug)
+  return {
+    id: catalogActivity?.id ?? slug,
+    backendId: backendActivity.id,
+    name: backendActivity.name,
+    image: catalogActivity?.image ?? '',
+    summary: catalogActivity?.summary ?? '',
+    requiresSize: backendActivity.cloth !== undefined ? Boolean(backendActivity.cloth) : Boolean(catalogActivity?.requiresSize),
+    minAge: backendActivity.minAge ?? catalogActivity?.minAge ?? 0,
+    maxCapacityActivity: backendActivity.maxCapacityActivity,
+    terms: backendActivity.termsAndConditions || catalogActivity?.terms || '',
+    times: PARK_TIMES,
+  }
 }
 
 function offeredTimes(activity) {

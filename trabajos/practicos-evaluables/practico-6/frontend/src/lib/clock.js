@@ -17,7 +17,7 @@ let base = null
 
 async function serverTime() {
   try {
-    const { now } = await request('/api/time')
+    const { now } = await request('/api/catalog/time')
     const time = Date.parse(now)
     if (Number.isFinite(time)) return time
   } catch {
