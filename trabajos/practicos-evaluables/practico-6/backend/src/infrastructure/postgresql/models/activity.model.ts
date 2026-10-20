@@ -12,6 +12,14 @@ ActivityModel.init({
         autoIncrement: true,
         primaryKey: true
     },
+    parkId: {
+        type: DataTypes.INTEGER,
+        allowNull: false,
+        references: {
+            model: 'park',
+            key: 'id',
+        },
+    },
     name: {
         type: DataTypes.STRING,
         allowNull: false

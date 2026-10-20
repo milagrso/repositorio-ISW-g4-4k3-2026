@@ -59,6 +59,7 @@ export const createActivityFixture = (overrides: Record<string, any> = {}) => {
 
     return {
         id: overrides.id ?? 1,
+        parkId: overrides.parkId ?? 1,
         name,
         enabled: overrides.enabled !== undefined ? overrides.enabled : true,
         cloth,
@@ -72,7 +73,12 @@ export const createActivityFixture = (overrides: Record<string, any> = {}) => {
 };
 
 export const createParkFixture = (overrides: Record<string, any> = {}) => ({
+    id: overrides.id ?? 1,
+    name: overrides.name ?? 'EcoHarmony Park',
     status: overrides.status ?? 'OPEN',
+    openTime: overrides.openTime ?? '08:30',
+    closeTime: overrides.closeTime ?? '19:00',
+    activities: overrides.activities ?? [],
     isOpen: () => (overrides.status ?? 'OPEN') === 'OPEN',
     ...overrides,
 });

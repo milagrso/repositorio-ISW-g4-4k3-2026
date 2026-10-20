@@ -31,6 +31,10 @@ export class PostgreSQLDatabase {
         const { ActivityModel } = require('../models/activity.model');
         const { TimeSlotModel } = require('../models/time-slot.model');
         const { InscriptionModel } = require('../models/inscription.model');
+        const { ParkModel } = require('../models/park.model');
+
+        ParkModel.hasMany(ActivityModel, { foreignKey: 'parkId', as: 'activities' });
+        ActivityModel.belongsTo(ParkModel, { foreignKey: 'parkId', as: 'park' });
 
         ActivityModel.hasMany(TimeSlotModel, { foreignKey: 'activityId', as: 'timeSlots' });
         TimeSlotModel.belongsTo(ActivityModel, { foreignKey: 'activityId', as: 'activity' });

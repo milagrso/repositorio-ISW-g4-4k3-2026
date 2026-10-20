@@ -9,6 +9,7 @@ import { Errors } from '../../../domain/messages/error-type.constants';
 import { RegisterInscriptionDto } from '../../dto/inscription/register-inscription.dto';
 import { EmailStatus, RegisterInscriptionResponse } from '../../dto/inscription/register-inscription.res';
 import { InscriptionEntity } from '../../../domain/entities/inscription.entity';
+import { ParticipantEntity } from '../../../domain/entities/participant.entity';
 import { Transactional } from '../../../infrastructure/decorators/transactional.decorator';
 import { TimeHelper } from '../../helpers/time.helper';
 
@@ -70,9 +71,13 @@ export class InscriptionService {
             throw new ServiceError((Errors.ACTIVITY_MAX_CAPACITY_EXCEEDED as any)(activity.maxCapacityActivity));
         }
 
+        const participants: ParticipantEntity[] = dto.participantes.map((p: any) =>
+            p instanceof ParticipantEntity ? p : ParticipantEntity.fromObject(p)
+        );
+
         // 7. Validar edad mínima por actividad
         if (activity.minAge !== undefined && activity.minAge !== null && activity.minAge > 0) {
-            const hasUnderage = dto.participantes.some((p) => p.edad < activity.minAge!);
+            const hasUnderage = participants.some((p) => !p.meetsMinAge(activity.minAge!));
             if (hasUnderage) {
                 throw new ServiceError(Errors.PARTICIPANT_AGE_BELOW_MINIMUM);
             }
@@ -89,7 +94,7 @@ export class InscriptionService {
 
         // 9. Verificar requisito de vestimenta/calzado si la actividad lo demanda
         if (activity.requiresCloth && activity.requiresCloth()) {
-            const hasMissingCloth = dto.participantes.some(
+            const hasMissingCloth = participants.some(
                 (p) => (!p.talleVestimenta && !p.talleCalzado)
             );
             if (hasMissingCloth) {
@@ -98,10 +103,10 @@ export class InscriptionService {
         }
 
         // 10. Validar solapamiento de horarios por participante (DNI)
-        for (const p of dto.participantes) {
+        for (const p of participants) {
             const overlap = await this.inscriptionRepository.hasActiveInscriptionForParticipant!(p.dni, dto.horario, dto.fecha);
             if (overlap) {
-                if (dto.participantes.length > 1) {
+                if (participants.length > 1) {
                     throw new ServiceError(Errors.GROUP_PARTICIPANT_SCHEDULE_OVERLAP);
                 } else {
                     throw new ServiceError(Errors.PARTICIPANT_SCHEDULE_OVERLAP);
@@ -121,7 +126,7 @@ export class InscriptionService {
             activityId: activity.id,
             timeSlotId: timeSlot.id,
             quantity: dto.cantidad,
-            participants: dto.participantes,
+            participants,
             contactEmail: dto.emailContacto,
             qrCode: '',
             termsAccepted: dto.aceptaTerminos,

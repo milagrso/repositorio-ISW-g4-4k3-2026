@@ -10,12 +10,13 @@ export class SeederHelper {
         try {
             await InscriptionModel.sync({ force: true });
             await TimeSlotModel.sync({ force: true });
-            await ActivityModel.sync({ force: true });
             await ParkModel.sync({ force: true });
+            await ActivityModel.sync({ force: true });
             await UserModel.sync({ force: true });
 
             // 1. Seed Park
             await ParkModel.create({
+                id: 1,
                 name: 'EcoHarmony Park',
                 status: 'OPEN',
                 openTime: '08:30',
@@ -127,7 +128,10 @@ export class SeederHelper {
 
             for (let actIdx = 0; actIdx < activities.length; actIdx++) {
                 const actData = activities[actIdx];
-                const activity = await ActivityModel.create(actData);
+                const activity = await ActivityModel.create({
+                    ...actData,
+                    parkId: 1,
+                });
                 const activityId = activity.dataValues.id;
                 const maxCapacity = actData.maxCapacityActivity;
 

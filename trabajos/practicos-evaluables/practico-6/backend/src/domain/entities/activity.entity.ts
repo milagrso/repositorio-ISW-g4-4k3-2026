@@ -8,7 +8,8 @@ export class ActivityEntity {
         public cloth: ClothEntity | null = null,
         public minAge?: number,
         public maxCapacityActivity?: number,
-        public termsAndConditions?: string
+        public termsAndConditions?: string,
+        public parkId: string | number = 1
     ) {}
 
     isAvailable(): boolean {
@@ -34,6 +35,7 @@ export class ActivityEntity {
             minAge,
             maxCapacityActivity,
             termsAndConditions,
+            parkId = 1,
         } = object;
 
         const clothEntity = cloth
@@ -47,7 +49,8 @@ export class ActivityEntity {
             clothEntity,
             minAge,
             maxCapacityActivity,
-            termsAndConditions
+            termsAndConditions,
+            parkId
         );
     }
 }
