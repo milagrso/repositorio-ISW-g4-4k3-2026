@@ -1,0 +1,64 @@
+@startuml ecoharmony_erd
+!pragma layout smetana
+!theme plain
+skinparam roundcorner 8
+skinparam shadowing false
+
+entity "parks" as parks {
+    * id : number <<PK>>
+    --
+    * name : string
+    * status : string
+    * openTime : string
+    * closeTime : string
+}
+
+entity "activities" as activities {
+    * id : number <<PK>>
+    --
+    * name : string
+    * enabled : boolean
+    cloth : object [null]
+    minAge : number [null]
+    maxCapacityActivity : number [null]
+    termsAndConditions : string [null]
+}
+
+entity "time_slots" as time_slots {
+    * id : number <<PK>>
+    --
+    * activityId : number <<FK>>
+    * fecha : string
+    * startTime : string
+    * endTime : string
+    * maxCapacity : number
+    * occupiedSlots : number
+}
+
+entity "users" as users {
+    * id : number <<PK>>
+    --
+    * nombre : string
+    * email : string
+}
+
+entity "inscriptions" as inscriptions {
+    * id : number <<PK>>
+    --
+    * activityId : number <<FK>>
+    * timeSlotId : number <<FK>>
+    fecha : string [null]
+    * quantity : number
+    * contactEmail : string
+    * termsAccepted : boolean
+    * status : string
+    numeroInscripcion : string [null]
+    * participants : object
+    qrCode : string [null]
+    * createdAt : date
+}
+
+activities ||--o{ time_slots : "1..*"
+activities ||--o{ inscriptions : "0..*"
+time_slots ||--o{ inscriptions : "0..*"
+@enduml

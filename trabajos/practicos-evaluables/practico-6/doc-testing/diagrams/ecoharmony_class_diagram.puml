@@ -1,0 +1,62 @@
+@startuml ecoharmony_class_diagram
+!pragma layout smetana
+!theme plain
+skinparam classAttributeIconSize 0
+skinparam roundcorner 8
+skinparam shadowing false
+
+package "Modelos de Base de Datos" {
+    class ActivityModel {
+        + id: number [PK]
+        + name: string
+        + enabled: boolean
+        + cloth: object?
+        + minAge: number?
+        + maxCapacityActivity: number?
+        + termsAndConditions: string?
+    }
+
+    class TimeSlotModel {
+        + id: number [PK]
+        + activityId: number [FK]
+        + fecha: string
+        + startTime: string
+        + endTime: string
+        + maxCapacity: number
+        + occupiedSlots: number
+    }
+
+    class InscriptionModel {
+        + id: number [PK]
+        + activityId: number [FK]
+        + timeSlotId: number [FK]
+        + fecha: string?
+        + quantity: number
+        + participants: object
+        + contactEmail: string
+        + termsAccepted: boolean
+        + status: string
+        + numeroInscripcion: string?
+        + qrCode: string?
+        + createdAt: date
+    }
+
+    class ParkModel {
+        + id: number [PK]
+        + name: string
+        + status: string
+        + openTime: string
+        + closeTime: string
+    }
+
+    class UserModel {
+        + id: number [PK]
+        + nombre: string
+        + email: string
+    }
+}
+
+ActivityModel "1" *-- "0..*" TimeSlotModel
+ActivityModel "1" *-- "0..*" InscriptionModel
+TimeSlotModel "1" *-- "0..*" InscriptionModel
+@enduml
