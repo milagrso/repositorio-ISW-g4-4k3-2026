@@ -296,10 +296,6 @@ export default function Inscripcion() {
       })
       const dateLabel = formatDate(form.date)
       const code = result.numeroInscripcion ?? (result.inscriptionId != null ? String(result.inscriptionId) : '')
-      // El backend devuelve un QR por participante; si no viene, el mail lo arma con estos datos.
-      const backendQr = new Map(
-        (result.participantes ?? []).filter((item) => item.qr).map((item) => [String(item.dni), item.qr]),
-      )
       setConfirmation({
         code,
         message: result.message || '',
@@ -313,7 +309,6 @@ export default function Inscripcion() {
         time: form.time,
         requiresSize: activity.requiresSize,
         image: activity.image,
-        visitors: visitors.map((visitor) => ({ ...visitor, qr: backendQr.get(visitor.dni) ?? null })),
       })
       scrollTop()
     } catch (error) {
