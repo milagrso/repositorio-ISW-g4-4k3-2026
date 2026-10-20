@@ -1,7 +1,7 @@
 # Justificación de Decisiones de Diseño e Implementación (TDD)
 
 **Cátedra:** Ingeniería de Software (ISW) — Unidad Nro. 4: Aseguramiento de Calidad de Proceso y de Producto  
-**Proyecto:** EcoHarmony Park — Backend  
+**Proyecto:** EcoHarmony Park — Backend y frontend de inscripción  
 **Trabajo Práctico:** TP6 — Desarrollo Conducido por Pruebas (TDD)  
 **User Story Asignada:** Inscribirme a actividad  
 **Metodología:** TDD (Red - Green - Refactor)  
@@ -52,7 +52,7 @@ La suite de 111 pruebas unitarias automatizadas se dividió en dos suites comple
 
 ### Gestión del Tiempo y Zona Horaria
 
-Se implementó un helper estático de presentación (`TimeHelper`) para centralizar la conversión horaria y se expuso el endpoint `GET /api/catalog/time`.
+Se implementó un helper estático de presentación (`TimeHelper`) para centralizar la conversión horaria y se expuso el endpoint `GET /api/time`.
 
 1. **Estándar Universal (UTC) como núcleo de interoperabilidad**  
    Internamente y hacia servicios externos o integraciones futuras hipotéticas, el sistema mantiene el estándar UTC. Esto evita conversiones ad-hoc dispersas en el código.
@@ -62,8 +62,11 @@ Se implementó un helper estático de presentación (`TimeHelper`) para centrali
    - Configuración de `hourCycle: 'h23'` para erradicar el defecto de formato (`T24:30`) entre las 00:00 y las 00:59.
    - Evaluación precisa de las políticas horarias del parque: habilitación de reservas dentro de las 24 horas previas y cierre estricto 15 minutos antes del inicio del turno.
 
-3. **Sincronización cliente-servidor (`GET /api/catalog/time`)**  
-   Dado que los visitantes acceden desde dispositivos cuyos relojes pueden estar desfasados, manuales o en husos horarios diferentes, `GET /api/catalog/time` actúa como la fuente única de verdad del reloj del parque.
+3. **Sincronización cliente-servidor (`GET /api/time`)**  
+   Dado que los visitantes acceden desde dispositivos cuyos relojes pueden estar desfasados, manuales o en husos horarios diferentes, `GET /api/time` actúa como la fuente única de verdad del reloj del parque.
+
+4. **El cliente no reserva con el reloj del teléfono**  
+   `useParkClock` guarda el instante devuelto por el servidor junto con `performance.now()` y, desde ahí, avanza solo con ese contador. Hoy, Mañana y la ventana de cada turno (24 horas antes y cierre 15 minutos antes) se calculan con esa hora del parque, no con `Date.now()` del dispositivo.
 
 ---
 
@@ -147,6 +150,69 @@ Se seleccionó **TypeScript** ejecutado sobre el entorno de **Node.js** como len
 
 3. **Seguridad de tipos en tiempo de compilación para TDD**  
    TypeScript complementa la disciplina de TDD aportando un sistema de tipos estático: los contratos de entidades, repositorios y DTOs se validan antes de la ejecución. Esto previene errores comunes en tiempo de ejecución.
+
+---
+
+### Interfaz de Usuario
+
+La pantalla del visitante es una aplicación de una sola página en **React 19**, empaquetada con **Vite** y enrutada con **wouter**.
+
+1. **Mismo lenguaje que el backend**  
+   React sobre Vite mantiene el stack en JavaScript. El cliente consume los contratos REST ya definidos —parque, actividades, turnos, sesión, hora del parque e inscripción— sin una capa de traducción entre lenguajes.
+
+2. **Enrutado mínimo (wouter)**  
+   El recorrido del visitante tiene tres rutas: el inicio (`/`), la inscripción (`/inscripcion`) y la página no encontrada. wouter cubre ese alcance sin el peso de un enrutador de aplicación completa, en línea con KISS y YAGNI.
+
+3. **Columna de celular como formato del parque**  
+   El layout se limita a un ancho móvil (`max-w-md`). El encabezado queda fijo y los pasos de la inscripción avanzan desde una barra inferior persistente, para que Atrás y Siguiente no se pierdan al recorrer el formulario.
+
+4. **Catálogo leído de la API**  
+   El inicio y la inscripción consultan `GET /api/catalog/parks`, `GET /api/catalog/activities`, `GET /api/catalog/time-slots` y `GET /api/catalog/session`. Las fotos, los resúmenes y la presentación visual se completan en el cliente, porque ese contenido de pantalla no forma parte del contrato de negocio.
+
+---
+
+### Sistema Visual: Paleta, Tipografía y Componentes
+
+La piel de la interfaz se armó con **Tailwind CSS 4** y **DaisyUI 5**, en un único tema claro.
+
+1. **Paleta del parque (FAQ 3)**  
+   Los cinco colores salen de la paleta `386641-6a994e-a7c957-f2e8cf-bc4749`. Fondos y textos no agregan colores ajenos: las variantes se obtienen mezclando esos cinco en el espacio OKLCH.
+   - `#386641` es el primario. Se usa en las acciones principales, en el paso activo y en las iniciales de la sesión. El texto sobre ese verde es el crema `#f2e8cf`.
+   - `#6a994e` es el secundario. Es el botón de avance de la barra inferior (Siguiente, Confirmar y Nueva inscripción), más claro que el marco oscuro que envuelve a las dos acciones.
+   - `#a7c957` es el acento. Marca la sesión en línea del avatar y la cantidad de cupos junto al reloj.
+   - `#f2e8cf` es el crema de las superficies. Las tarjetas lo aclaran con blanco.
+   - `#bc4749` es el error, para el aviso debajo del campo y los estados inválidos. La advertencia mezcla ese rojo con el crema.
+
+
+2. **Tipografía Lato**  
+   Se carga Lato en los pesos 400, 700 y 900 y se usa tanto para el texto como para los títulos (`--font-sans` y `--font-display`). Un solo corte alcanza para una interfaz corta y evita mezclar familias.
+
+3. **Piezas de DaisyUI e íconos de Lucide**  
+   Botones, alertas, campos, casillas y el menú de la sesión son componentes de DaisyUI, con radios grandes (de `1.25rem` a `1.75rem`) para acompañar las fotos redondeadas. Los íconos —correo, sumar o quitar personas, paso completo— vienen de **lucide-react**, sin dibujar un set propio.
+
+4. **Movimiento que se apaga si el sistema lo pide**  
+   Los cambios de página, el carrusel del inicio y la confirmación usan **Motion**. Cuando el dispositivo pide reducir el movimiento (`useReducedMotion`), esas animaciones no corren.
+
+---
+
+### Flujo de Inscripción en el Cliente
+
+El formulario muestra en pantalla las reglas que el backend ya aplica, antes de enviar `POST /api/inscriptions`.
+
+1. **Hoy o mañana, no un mes**  
+   Como la reserva no puede anticiparse más de 24 horas, alcanzan dos fechas. El selector son dos tarjetas, Hoy y Mañana, y no un calendario mensual. El lunes, el 25 de diciembre y el 1 de enero figuran cerrados.
+
+2. **Reloj limitado a la ventana de reserva**  
+   La hora se elige moviendo la aguja. El reloj solo ofrece turnos que todavía se pueden reservar: no muestra los que faltan más de 24 horas ni los que ya están a menos de 15 minutos de empezar. Al lado se leen los cupos de esa hora, calculados con `maxCapacity` y `occupiedSlots`.
+
+3. **El aviso queda junto al dato**  
+   El error se escribe debajo del campo, sin un resumen repetido arriba del formulario. En el cliente, el DNI tiene 7 u 8 dígitos y no puede repetirse entre las personas de la misma inscripción; la edad va de 1 a 99 años y respeta la edad mínima de la actividad; el talle, cuando la actividad lo pide, pertenece a `XS`–`XXL`.
+
+4. **Sesión en el encabezado y entrada en el correo**  
+   El avatar muestra la sesión que devuelve el backend: nombre, correo e identificador. Al confirmar, la pantalla pide revisar ese correo porque ahí llegó la entrada. Si el envío falla, el aviso separa la reserva ya guardada del correo que no salió.
+
+5. **Dos pesos en la misma barra**  
+   Atrás queda sobre el marco oscuro. El paso hacia adelante usa el secundario `#6a994e`, para distinguir las dos acciones dentro del mismo recuadro. Cuando la reserva termina, esos lugares pasan a decir Inicio y Nueva inscripción.
 
 ---
 
