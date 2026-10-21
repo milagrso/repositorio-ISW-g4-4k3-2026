@@ -1,3 +1,4 @@
+
 # Justificación de Decisiones de Diseño e Implementación (TDD)
 
 **Cátedra:** Ingeniería de Software (ISW) — Unidad Nro. 4: Aseguramiento de Calidad de Proceso y de Producto  
@@ -109,9 +110,6 @@ En la capa de dominio, el requerimiento de vestimenta se modeló como una clase 
 
 2. **Encapsulamiento de datos como Value Object**  
    A pesar de la flexibilidad en la persistencia, en el dominio se definió la clase `ClothEntity` que se comporta como un *Value Object* inmutable y encapsula la regla de validación de talles (`XS` a `XXL` y números de calzado permitidos).
-
----
-
 ### Arquitectura de API REST y Nomenclatura
 
 En la fase final de refactorización, se eliminaron los endpoints basados en verbos RPC (`/inscriptions/register`, `/activities/:id/turnos`) y se adoptó una convención REST pura en inglés (`POST /api/inscriptions`, `GET /api/catalog/time-slots?activityId=&date=`).
@@ -132,9 +130,11 @@ En la fase final de refactorización, se eliminaron los endpoints basados en ver
 
 ![Diagrama Entidad-Relación de la Base de Datos](./diagrams/ecoharmony_erd.png)
 
-#### Diagrama de Clases de la Base de Datos
 
-![Diagrama de Clases de la Base de Datos](./diagrams/ecoharmony_class_diagram.png)
+#### Diagrama de Clases de Entidades del Dominio
+
+![Diagrama de Clases de Entidades del Dominio](./diagrams/ecoharmony_class_diagram.png)
+
 
 ---
 

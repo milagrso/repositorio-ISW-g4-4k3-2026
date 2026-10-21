@@ -5,82 +5,91 @@ skinparam classAttributeIconSize 0
 skinparam roundcorner 8
 skinparam shadowing false
 
-package "Modelos de Base de Datos" {
-    class ActivityModel {
-        + id: number [PK]
-        + parkId: number [FK]
-        + name: string
-        + enabled: boolean
-        + cloth: object?
-        + minAge: number?
-        + maxCapacityActivity: number?
-        + termsAndConditions: string?
-    }
-
-    class TimeSlotModel {
-        + id: number [PK]
-        + activityId: number [FK]
-        + fecha: string
-        + startTime: string
-        + endTime: string
-        + maxCapacity: number
-        + occupiedSlots: number
-    }
-
-    class InscriptionModel {
-        + id: number [PK]
-        + activityId: number [FK]
-        + timeSlotId: number [FK]
-        + fecha: string?
-        + quantity: number
-        + participants: object
-        + contactEmail: string
-        + termsAccepted: boolean
-        + status: string
-        + numeroInscripcion: string?
-        + qrCode: string?
-        + createdAt: date
-    }
-
-    class ParkModel {
-        + id: number [PK]
-        + name: string
-        + status: string
-        + openTime: string
-        + closeTime: string
-    }
-
-    class UserModel {
-        + id: number [PK]
-        + nombre: string
-        + email: string
-    }
+class ParkEntity {
+    + id: string | number
+    + name: string
+    + status: string
+    + openTime: string
+    + closeTime: string
+    + activities: ActivityEntity[]
+    + isOpen(): boolean
+    + {static} fromObject(object: any): ParkEntity
 }
 
-package "Clases de Dominio (No Entidades BDD)" {
-    class ParticipantEntity <<Domain Class>> {
-        + nombre: string
-        + dni: number
-        + edad: number
-        + talleCalzado: number?
-        + talleVestimenta: string?
-        + meetsMinAge(minAge: number): boolean
-        + hasValidClothSize(cloth: ClothEntity): boolean
-        + {static} fromObject(object: any): ParticipantEntity
-    }
-
-    class ClothEntity <<Value Object>> {
-        + tipo: string
-        + tallesValidos: string[]?
-        + isValidSize(size: any): boolean
-        + {static} fromObject(object: any): ClothEntity
-    }
+class ActivityEntity {
+    + id: string | number
+    + name: string
+    + enabled: boolean
+    + cloth: ClothEntity?
+    + minAge: number?
+    + maxCapacityActivity: number?
+    + termsAndConditions: string?
+    + parkId: string | number
+    + isAvailable(): boolean
+    + requiresCloth(): boolean
+    + validateCloth(size: any): boolean
+    + {static} fromObject(object: any): ActivityEntity
 }
 
-ParkModel "1" *-- "1..*" ActivityModel : posee >
-ActivityModel "1" *-- "0..*" TimeSlotModel
-ActivityModel "1" *-- "0..*" InscriptionModel
-TimeSlotModel "1" *-- "0..*" InscriptionModel
-InscriptionModel "1" *-- "1..*" ParticipantEntity : contiene (JSON) >
-ActivityModel ..> ClothEntity : configura (JSON) >
+class ClothEntity {
+    + tipo: string
+    + tallesValidos: string[]?
+    + isValidSize(size: any): boolean
+    + {static} fromObject(object: any): ClothEntity
+}
+
+class ParticipantEntity {
+    + nombre: string
+    + dni: number
+    + edad: number
+    + talleCalzado: number?
+    + talleVestimenta: string?
+    + meetsMinAge(minAge: number): boolean
+    + hasValidClothSize(cloth: ClothEntity): boolean
+    + {static} fromObject(object: any): ParticipantEntity
+}
+
+class TimeSlotEntity {
+    + id: string | number
+    + activityId: string | number
+    + startTime: string
+    + endTime: string
+    + maxCapacity: number
+    + occupiedSlots: number
+    + fecha: string?
+    + getAvailableSlots(): number
+    + hasAvailableSlots(qty: number): boolean
+    + reserve(qty: number): void
+    + {static} fromObject(object: any): TimeSlotEntity
+}
+
+class InscriptionEntity {
+    + id: string | number
+    + activityId: string | number
+    + timeSlotId: string | number
+    + quantity: number
+    + participants: ParticipantEntity[]
+    + contactEmail: string
+    + qrCode: string
+    + termsAccepted: boolean
+    + status: string
+    + createdAt: Date
+    + fecha: string?
+    + numeroInscripcion: string?
+    + {static} fromObject(object: any): InscriptionEntity
+}
+
+class UserEntity {
+    + id: string | number
+    + nombre: string
+    + email: string
+    + {static} fromObject(object: any): UserEntity
+}
+
+ParkEntity "1" *-- "1..*" ActivityEntity : posee >
+ActivityEntity "1" *-- "0..*" TimeSlotEntity : ofrece >
+ActivityEntity "1" *-- "0..*" InscriptionEntity
+TimeSlotEntity "1" *-- "0..*" InscriptionEntity
+InscriptionEntity "1" *-- "1..*" ParticipantEntity : contiene >
+ActivityEntity "1" o-- "0..1" ClothEntity : requiere >
 @enduml
