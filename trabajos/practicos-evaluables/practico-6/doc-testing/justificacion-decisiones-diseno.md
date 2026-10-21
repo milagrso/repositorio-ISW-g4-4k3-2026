@@ -1,14 +1,3 @@
-
-# Justificación de Decisiones de Diseño e Implementación (TDD)
-
-**Cátedra:** Ingeniería de Software (ISW) — Unidad Nro. 4: Aseguramiento de Calidad de Proceso y de Producto  
-**Proyecto:** EcoHarmony Park — Backend y frontend de inscripción  
-**Trabajo Práctico:** TP6 — Desarrollo Conducido por Pruebas (TDD)  
-**User Story Asignada:** Inscribirme a actividad  
-**Metodología:** TDD (Red - Green - Refactor)  
-
----
-
 ### Arquitectura en Capas Orientada a la Testeabilidad
 
 Para el desarrollo de la User Story, se adoptó una **Arquitectura en Capas (Layered Architecture)**.
